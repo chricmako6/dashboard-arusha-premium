@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff; /* White background */
+  --foreground: #000000; /* Black text */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.react-calendar {
+  overflow: hidden;
+  border-radius: 8px;
+  border: none;
+  font-family: Inter, sans-serif;
+}
+.react-calendar__tile--now {
+  border-radius: 4px;
+}
+
+.react-calendar__navigation__label__labelText{
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background-color: #c3ebfa;
+  color: black;
+  border-radius: 4px;
+}
+
+
