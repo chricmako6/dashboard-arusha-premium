@@ -7,11 +7,11 @@ const menuItems = [
   {
     title: "MENU",
     items: [
-      { icon: "/home.svg", name: "Home", link: "/dashboard/main" },
+      { icon: "/home.svg", name: "Home", link: "/dashboard" },
       { icon: "/teacher.svg", name: "Teachers", link: "/dashboard/teacher" },
       { icon: "/student.svg", name: "Students", link: "/dashboard/student" },
       { icon: "/parent.svg", name: "Parents", link: "/dashboard/parent" },
-      { icon: "/schooll.svg", name: "Classes", link: "/dashboard/class" },
+      { icon: "/schooll.svg", name: "Finance", link: "/dashboard/finance" },
       { icon: "/lesson.svg", name: "Lessons", link: "/dashboard/lesson" },
       { icon: "/exam.svg", name: "Exams", link: "/dashboard/exam" },
       { icon: "/assignment.svg", name: "Assignments", link: "/dashboard/assignment" },
@@ -41,6 +41,7 @@ export default function Menu() {
   }, [pathname]);
 
   return (
+    
     <nav className="flex flex-col gap-6">
       {menuItems.map((menu, menuIndex) => (
         <div key={menuIndex}>
