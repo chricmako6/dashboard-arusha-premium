@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // Import the next/image component
+import Image from "next/image"; 
+import { IoIosArrowDown } from "react-icons/io";
 import { usePathname } from "next/navigation";
 
 const menuItems = [
@@ -22,11 +23,7 @@ const menuItems = [
       { icon: "/parent.svg", name: "Supplier", link: "/dashboard/parent" },
       { icon: "/schooll.svg", name: "Finance", link: "/dashboard/finance" },
       { icon: "/lesson.svg", name: "Report", link: "/dashboard/lesson" },
-      { icon: "/exam.svg", name: "Exams", link: "/dashboard/exam" },
-      { icon: "/assignment.svg", name: "Assignments", link: "/dashboard/assignment" },
-      { icon: "/attendance.svg", name: "Attendance", link: "/dashboard/attandance" },
       { icon: "/event.svg", name: "Events", link: "/dashboard/event" },
-      { icon: "/message2.svg", name: "Messages", link: "/dashboard/message" },
       { icon: "/announcement.svg", name: "Announcements", link: "/dashboard/announcement" },
     ],
   },
@@ -87,7 +84,7 @@ export default function Menu() {
                       <span className="hidden lg:block">{item.name}</span>
                     </div>
                     <span className={`transform transition-transform ${openDropdown === itemIndex ? "rotate-180" : ""}`}>
-                      ▼
+                      <IoIosArrowDown />
                     </span>
                   </button>
                 ) : (
