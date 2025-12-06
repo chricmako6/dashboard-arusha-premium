@@ -12,15 +12,15 @@ const menuItems = [
       { 
         icon: "/teacher.svg",
         name: "Inventory", 
-        link: "/dashboard/teacher",
+        link: "/dashboard/",
         submenu: [
-          { name: "Inventory List", link: "/dashboard/teacher/list" },
-          { name: "Add Inventory", link: "/dashboard/teacher/add" },
+          { name: "Inventory List", link: "/dashboard/inventory" },
+          { name: "Add Inventory", link: "/dashboard/inventory-add" },
           { name: "Inventory Report", link: "/dashboard/teacher/report" },
         ]
       },
-      { icon: "/student.svg", name: "Production", link: "/dashboard/student" },
-      { icon: "/parent.svg", name: "Supplier", link: "/dashboard/parent" },
+      { icon: "/student.svg", name: "Production", link: "/dashboard/production" },
+      { icon: "/parent.svg", name: "Supplier", link: "/dashboard/supplier" },
       { icon: "/schooll.svg", name: "Finance", link: "/dashboard/finance" },
       { icon: "/lesson.svg", name: "Report", link: "/dashboard/lesson" },
       { icon: "/event.svg", name: "Events", link: "/dashboard/event" },

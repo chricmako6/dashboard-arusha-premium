@@ -8,150 +8,127 @@ import { ImBin } from "react-icons/im";
 import { BiSolidEdit } from "react-icons/bi";
 import PaginationComponent from "@/components/ui/PaginationComponent";
 
-function parentPage() {
+function productionPage() {
   const teachers = [
     {
       id: 1,
       name: "John Doe",
       teacherId: "TCH-001",
-      subject: "Mathematics",
-      phone: "(555) 101-2020",
-      address: "101 High St, Springfield",
-      email: "johndoe@school.edu",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
       image: "/user1.png",
-      classes: ["Grade 10", "Grade 11"],
     },
     {
       id: 2,
-      name: "Jane Smith",
+      name: "John Doe",
       teacherId: "TCH-002",
-      subject: "English",
-      phone: "(555) 203-4040",
-      address: "204 Lake Rd, Springfield",
-      email: "janesmith@school.edu",
+      subject: "160",
+      classes: "20",
+      phone: "In stock",
+      address: "$59.66",
       image: "/user2.png",
-      classes: ["Grade 9", "Grade 12"],
     },
     {
       id: 3,
-      name: "Michael Brown",
-      teacherId: "TCH-003",
-      subject: "Science",
-      phone: "(555) 505-6060",
-      address: "303 River Ln, Springfield",
-      email: "michaelb@school.edu",
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Out of stock",
+      address: "$59.66",
       image: "/user3.png",
-      classes: ["Grade 8", "Grade 10"],
     },
     {
       id: 4,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
       image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
     },
     {
       id: 5,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user5.png",
     },
     {
       id: 6,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user6.png",
     },
     {
       id: 7,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user7.png",
     },
     {
       id: 8,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user8.png",
     },
     {
       id: 9,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user9.png",
     },
     {
       id: 10,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user10.png",
     },
     {
       id: 11,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user1.png",
     },
     {
       id: 12,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
-    },
-    {
-      id: 13,
-      name: "Sarah Johnson",
-      teacherId: "TCH-004",
-      subject: "History",
-      phone: "(555) 707-8080",
-      address: "505 Maple Ave, Springfield",
-      email: "sarahj@school.edu",
-      image: "/user4.png",
-      classes: ["Grade 7", "Grade 9"],
+      name: "John Doe",
+      teacherId: "TCH-001",
+      subject: "120",
+      classes: "20",
+      phone: "Active",
+      address: "$59.66",
+      image: "/user1.png",
     },
   ];
 
@@ -203,7 +180,7 @@ function parentPage() {
     <div className="bg-white rounded-md p-4 mt-4 shadow-md w-[98%] mx-auto">
       {/* HEADER SECTION */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-lg font-semibold">All Parents List</h1>
+        <h1 className="text-lg font-semibold">All Product List</h1>
         <span className="flex justify-between items-center gap-2">
           {/* SEARCH BAR */}
           <div className="hidden md:flex items-center bg-gray-200 p-1 rounded-full ring-gray-300 px-2">
@@ -217,7 +194,7 @@ function parentPage() {
             <input
               type="text"
               placeholder="Search by ID, Name..."
-              className="p-1 w-80 border-none bg-transparent text-xs gap-2 focus:outline-none"
+              className="px-2 py-2 w-80 border-none bg-transparent text-xs gap-2 focus:outline-none"
             />
           </div>
           {/* BUTTONS */}
@@ -245,13 +222,13 @@ function parentPage() {
                   className="w-4 h-4"
                 />
               </th>
-              <th className="px-4 py-6">Name</th>
-              <th className="px-4 py-6">Teacher ID</th>
-              <th className="px-4 py-6">Subject</th>
-              <th className="px-4 py-6">Classes</th>
-              <th className="px-4 py-6">Phone</th>
-              <th className="px-4 py-6">Address</th>
-              <th className="px-4 py-6 rounded-tr-xl">Action</th>
+              <th className="px-4 py-6">ITEM NAME</th>
+              <th className="px-4 py-6">SKU</th>
+              <th className="px-4 py-6">ITEM SOLD</th>
+              <th className="px-4 py-6">TOTAL SELL</th>
+              <th className="px-4 py-6">STATUS</th>
+              <th className="px-4 py-6">PRICE</th>
+              <th className="px-4 py-6 rounded-tr-xl">ACTION</th>
             </tr>
           </thead>
           <tbody>
@@ -283,7 +260,7 @@ function parentPage() {
                   </td>
                   <td className="px-4 py-5">{t.teacherId}</td>
                   <td className="px-4 py-5">{t.subject}</td>
-                  <td className="px-4 py-5">{t.classes.join(", ")}</td>
+                  <td className="px-4 py-5">{t.classes}</td>
                   <td className="px-4 py-5">{t.phone}</td>
                   <td className="px-4 py-5">{t.address}</td>
                   <td className="px-4 py-5 text-gray-500 text-xl">
@@ -313,4 +290,5 @@ function parentPage() {
     </div>
   );
 }
-export default parentPage;
+
+export default productionPage;
