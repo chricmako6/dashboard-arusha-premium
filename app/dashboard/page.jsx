@@ -1,10 +1,10 @@
 import React from 'react'
-import UserCard from '@/components/UserCard'
-import CountChart from '@/components/CountChart'
-import AttendanceChart from '@/components/AttendanceChart'
-import FinanceChart from '@/components/FinanceChart'
-import EventCalendar from '@/components/EventCalendar'
-import Announcement from '@/components/Announcement'
+import UserCard from '@/components/ui/UserCard'
+import CountChart from '@/components/ui/CountChart'
+import AttendanceChart from '@/components/ui/AttendanceChart'
+import FinanceChart from '@/components/ui/FinanceChart'
+import EventCalendar from '@/components/ui/EventCalendar'
+import Announcement from '@/components/ui/Announcement'
 
 export default function MainDashboard() {
   return (
