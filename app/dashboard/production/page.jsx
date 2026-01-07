@@ -6,7 +6,7 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import { PiDotsThreeCircle } from "react-icons/pi";
 import { ImBin } from "react-icons/im";
 import { BiSolidEdit } from "react-icons/bi";
-import PaginationComponent from "@/components/ui/PaginationComponent";
+import PaginationComponent from "@/components/ui01/PaginationComponent";
 
 function productionPage() {
   const teachers = [

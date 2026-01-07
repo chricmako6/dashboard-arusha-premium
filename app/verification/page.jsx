@@ -8,7 +8,7 @@ import { auth, getFirebaseAuth } from '@/lib/firebase';
 import { getAuth, onAuthStateChanged, signOut, updateCurrentUser } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import Approvalwait from '@/components/Application/approvalwait';
-import { doc, getDoc, getFirestore, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 
 function pageVerification() {
   const router = useRouter(); 
@@ -123,7 +123,7 @@ function pageVerification() {
           if (verified) {
             // User is now verified, redirect to dashboard
             router.replace("/dashboard");
-          }
+          } 
         }
       });
 
@@ -240,7 +240,7 @@ const checkExistingVerification = async (userId) => {
         updatedAt: serverTimestamp()
       };
 
-      await getDoc(userDocRef, verificationData, { merge: true });
+      await setDoc(userDocRef, verificationData, { merge: true });
       
       console.log("✅ Data saved to Firestore with isVerified: false");
       return true;

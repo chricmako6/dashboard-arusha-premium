@@ -5,7 +5,7 @@ import { ImBin } from "react-icons/im";
 import { SlCalender } from "react-icons/sl";
 import { FaAngleDown } from "react-icons/fa6";
 import { BiSolidEdit } from "react-icons/bi";
-import PaginationComponent from "@/components/ui/PaginationComponent";
+import PaginationComponent from "@/components/ui01/PaginationComponent";
 
 function FinanceTable() {
       const teachers = [
