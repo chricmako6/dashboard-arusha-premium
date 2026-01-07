@@ -31,8 +31,7 @@ const menuItems = [
     title: "OTHER",
     items: [
       { icon: "/profile2.svg", name: "Profile", link: "/dashboard/profile" },
-      { icon: "/gears1.svg", name: "Setting", link: "/dashboard/setting" },
-      { icon: "/logout.svg", name: "Logout", link: "/dashboard/logout" },
+      { icon: "/gears1.svg", name: "Setting", link: "/dashboard/setting" }
     ],
   },
 ];

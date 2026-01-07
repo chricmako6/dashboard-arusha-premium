@@ -9,6 +9,7 @@ import { getAuth, onAuthStateChanged, signOut, updateCurrentUser } from 'firebas
 import toast from 'react-hot-toast';
 import Approvalwait from '@/components/Application/approvalwait';
 import { doc, getDoc, getFirestore, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { PiDotsThreeOutlineBold } from 'react-icons/pi';
 
 function pageVerification() {
   const router = useRouter(); 
@@ -316,13 +317,15 @@ const checkExistingVerification = async (userId) => {
   };
 
    // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-black to-amber-200 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-gray-200 flex items-center justify-center">
+          <div className="text-gray-700 flex items-center">
+              Loading<span className='animate-pulse ml-1'><PiDotsThreeOutlineBold className="w-10 h-10 "/></span>
+          </div>
+        </div>
+      );
+    }
 
   return (
      <div className="min-h-screen bg-linear-to-br from-black to-amber-200 p-6 flex flex-col items-center">
