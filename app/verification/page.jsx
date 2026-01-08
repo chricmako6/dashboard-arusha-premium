@@ -3,6 +3,7 @@ import React, {useState, useEffect} from 'react'
 import { FaUser, FaCreditCard, FaFileAlt, FaEye } from "react-icons/fa";
 import { FiLogOut, FiCheckCircle, FiEdit2 } from "react-icons/fi";
 import { TiTick } from "react-icons/ti";
+import { CgProfile } from "react-icons/cg";
 import { useRouter } from "next/navigation";
 import { auth, getFirebaseAuth } from '@/lib/firebase';
 import { getAuth, onAuthStateChanged, signOut, updateCurrentUser } from 'firebase/auth';
@@ -31,41 +32,29 @@ function pageVerification() {
    // Form data state
   const [formData, setFormData] = useState({
     // User Details
-    gender: "",
-    dateOfBirth: "",
-    identifyCode: "",
-    hometown: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    dateBirth: "",
     nationality: "",
-    religion: "",
-    language: "",
-    maritalStatus: "",
+    mobile: "",
+    gender: "",
     
     // Payment Info
-    cardholderName: "",
     cardType: "",
+    cardholderName: "",
     cardNumber: "",
     expiryDate: "",
-    bankName: "",
-    accountType: "",
-    paymentMethod: "",
-    currency: "",
-    billingAddress: "",
-    billingCity: "",
-    billingState: "",
-    billingZipCode: "",
+    status: "",
     
     // Documents
-    documentType: "",
-    documentNumber: "",
-    issueDate: "",
-    docExpiryDate: "",
-    issuingAuthority: "",
-    issuingCountry: "",
-    placeOfIssue: "",
-    documentStatus: "",
-    fullName: "",
-    docDateOfBirth: "",
-    documentNotes: ""
+    passport: "",
+    proofAddress: "",
+    doctype: "",
+    tin: "",
+    nida: "",
+    education: "",
   });
 
  // 🔐 AUTH GUARD with Verification Check
@@ -328,7 +317,7 @@ const checkExistingVerification = async (userId) => {
     }
 
   return (
-     <div className="min-h-screen bg-linear-to-br from-black to-amber-200 p-6 flex flex-col items-center">
+     <div className="min-h-screen bg-gray-200 p-6 flex flex-col items-center">
       {/* Top Profile Card */}
       <div className="w-full max-w-3xl bg-[#111118]/70 backdrop-blur-xl p-5 rounded-xl shadow-2xl border border-white/10 mb-10">
         <div className="flex items-center space-x-4">
@@ -356,7 +345,7 @@ const checkExistingVerification = async (userId) => {
       </div>
 
       <h1 className="text-2xl font-semibold mb-2">Complete Your Profile</h1>
-      <p className="text-gray-400 text-sm mb-10">Fill in your information to get started</p>
+      <p className="text-sm mb-10">Fill in your information to get started</p>
 
       {/* WAITING FOR APPROVAL OVERLAY isVerified is true */}
       {waitingForApproval && !isVerified && (
@@ -382,8 +371,8 @@ const checkExistingVerification = async (userId) => {
                   <div
                     className={`
                       h-1 w-24 mx-4 rounded-full transition-all duration-300
-                      ${isCompleted ? "bg-green-400" : ""}
-                      ${isActive ? "bg-green-400" : ""}
+                      ${isCompleted ? "bg-amber-200" : ""}
+                      ${isActive ? "bg-amber-200" : ""}
                       ${isPending && step < s.id ? "bg-gray-700" : ""}
                     `}
                   ></div>
@@ -394,7 +383,7 @@ const checkExistingVerification = async (userId) => {
                     className={`
                       w-12 h-12 rounded-full border flex items-center justify-center mx-auto
                       transition-all duration-300
-                      ${isCompleted ? "bg-green-500 border-green-400" : ""}
+                      ${isCompleted ? "bg-amber-200 border-amber-200" : ""}
                       ${isActive ? "border-white bg-white/10" : ""}
                       ${isPending ? "border-white/10 bg-white/5" : ""}
                     `}
@@ -413,7 +402,7 @@ const checkExistingVerification = async (userId) => {
 
                   {isActive && <span className="text-blue-400 text-xs">In Progress</span>}
                   {isPending && <span className="text-gray-500 text-xs">Pending</span>}
-                  {isCompleted && <span className="text-green-400 text-xs">Completed</span>}
+                  {isCompleted && <span className="text-amber-200 text-xs">Completed</span>}
                 </div>
               </div>
             );
@@ -432,99 +421,148 @@ const checkExistingVerification = async (userId) => {
 
                 <form className="space-y-6">
                   {/* Row 1: Gender and Date of Birth */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
-                      <input
-                        type="text"
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                 {/* Profile Picture */}
+                  <div className="text-center border-b-2 pb-6 mb-6">
+                    <div className="flex flex-col items-center">
+                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="profile-upload"
+                        />
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Date of birth</label>
-                      <input
-                        type="text"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
+                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Profile Picture</h2>
                   </div>
-
-                  {/* Row 2: Identify Code and Hometown */}
+                  {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Identify code *</label>
-                      <input
-                        type="tel"
-                        name="identifyCode"
-                        value={formData.identifyCode}
+                      <label className="text-sm font-semibold text-gray-700 mb-2">Name</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                        type="text"
+                        name="username"
+                        value={formData.username}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
                         required
-                      />
+                        placeholder="Enter your name"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Hometown</label>
-                      <input
-                        type="text"
-                        name="hometown"
-                        value={formData.hometown}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 3: Nationality and Religion */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Nationality</label>
-                      <input
-                        type="text"
-                        name="nationality"
-                        value={formData.nationality}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Religion</label>
-                      <input
-                        type="text"
-                        name="religion"
-                        value={formData.religion}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile number</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                          type="tel"
+                          name="mobile" 
+                          value={formData.mobile}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter mobile number"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Row 4: Language and Marital Status */}
+                  {/* Row 3: First Name and Last Name */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Language</label>
-                      <input
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
                         type="text"
-                        name="language"
-                        value={formData.language}
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                       className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                        required
+                        placeholder="Enter your first name"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Marital status</label>
-                      <input
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
                         type="text"
-                        name="maritalStatus"
-                        value={formData.maritalStatus}
+                        name="lastName"
+                        value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter your last name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 4: Email and Nationality */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter your email"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Nationality</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <select
+                          name="nationality"
+                          value={formData.nationality}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                        >
+                          <option value="">Select Nationality</option>
+                          <option value="Tanzania">Tanzania</option>
+                          <option value="Kenya">Kenya</option>
+                          <option value="Uganda">Uganda</option>
+                          <option value="Congo">Congo</option>
+                        </select>
+                      </div>
+                    </div>
+                     <div>
+                      <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Date birth</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                        type="date"
+                        name="dateBirth"
+                        value={formData.dateBirth}
+                        onChange={handleInputChange}
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter your date of birth"
+                        />
+                      </div>
+                    </div>
+                     <div>
+                      <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Gender *</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                       <select
+                          name="gender" 
+                          value={formData.gender}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                          <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </form>
@@ -537,142 +575,112 @@ const checkExistingVerification = async (userId) => {
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <div className="flex justify-between items-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800">Edit Payment Information</h1>
+                  <h1 className="text-3xl font-bold text-gray-800">Payment Information</h1>
                 </div>
 
                 <form className="space-y-6">
-                  {/* Row 1: Cardholder Name and Card Type */}
+                  {/* Row 1: Gender and Date of Birth */}
+                 {/* Profile Picture */}
+                  <div className="text-center border-b-2 pb-6 mb-6">
+                    <div className="flex flex-col items-center">
+                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="profile-upload"
+                        />
+                    </div>
+                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Profile Picture</h2>
+                  </div>
+                  {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Cardholder Name</label>
-                      <input
+                      <label className="text-sm font-semibold text-gray-700 mb-2">Card holder name</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
                         type="text"
                         name="cardholderName"
                         value={formData.cardholderName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                        required
+                        placeholder="Enter your name"
+                        />
+                      </div>
                     </div>
+
+                      {/* card type  */}
+                     <div>
+                       <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Card Type</label>
+                       <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <select
+                            name="cardType" 
+                            value={formData.cardType}
+                            onChange={handleInputChange}
+                            className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                            required
+                              >
+                            <option value="">Select Type</option>
+                            <option value="amex">AMEX</option>
+                            <option value="visa">VISA</option>
+                            <option value="mastercard">MASTERCARD</option>
+                          </select>
+                      </div>
+                     </div>
+                   </div>
+
+                  {/* CARD NUMBER, EXPIRE AND STATUS */}
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* card number */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Card Type</label>
-                      <input
-                        type="text"
-                        name="cardType"
-                        value={formData.cardType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Card number</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                          type="tel"
+                          name="cardNumber" 
+                          value={formData.cardNumber}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter mobile number"
+                        />
+                      </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Expire Date</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                          type="text"
+                          name="expiryDate"
+                          value={formData.expiryDate}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                          placeholder="Enter your first name"
+                          />
+                      </div>
+                     </div>
                   </div>
 
-                  {/* Row 2: Card Number and Expiry Date */}
+                  {/* status */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Card Number</label>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Expiry Date</label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 3: Bank Name and Account Type */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
-                      <input
-                        type="text"
-                        name="bankName"
-                        value={formData.bankName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Account Type</label>
-                      <input
-                        type="text"
-                        name="accountType"
-                        value={formData.accountType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 4: Payment Method and Currency */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Method</label>
-                      <input
-                        type="text"
-                        name="paymentMethod"
-                        value={formData.paymentMethod}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
-                      <input
-                        type="text"
-                        name="currency"
-                        value={formData.currency}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Billing Address */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Billing Address</label>
-                  </div>
-
-                  {/* Row 5: City, State, Zip Code */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-                      <input
-                        type="text"
-                        name="billingCity"
-                        value={formData.billingCity}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
-                      <input
-                        type="text"
-                        name="billingState"
-                        value={formData.billingState}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Zip Code</label>
-                      <input
-                        type="text"
-                        name="billingZipCode"
-                        value={formData.billingZipCode}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
+                      <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Status</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <select
+                          name="status"
+                          value={formData.status}
+                          onChange={handleInputChange}
+                          className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                          required
+                        >
+                          <option value="">Select status</option>
+                          <option value="Tanzania">Active</option>
+                          <option value="Kenya">Pending</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </form>
@@ -681,146 +689,101 @@ const checkExistingVerification = async (userId) => {
           )}
 
           {/* DOCUMENTS */}
-          {step === 3 && (
+           {step === 3 && (
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <div className="flex justify-between items-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800">Edit Document Information</h1>
+                  <h1 className="text-3xl font-bold text-gray-800">Document Information</h1>
                 </div>
 
                 <form className="space-y-6">
-                  {/* Row 1: Document Type and Document Number */}
+                  {/* Row 1: Gender and Date of Birth */}
+                 {/* Profile Picture */}
+                  <div className="text-center border-b-2 pb-6 mb-6">
+                    <div className="flex flex-col items-center">
+                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="profile-upload"
+                        />
+                    </div>
+                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Proof of Address</h2>
+                  </div>
+                  {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Document Type</label>
-                      <input
-                        type="text"
-                        name="documentType"
-                        value={formData.documentType}
+                      <label className="text-sm font-semibold text-gray-700 mb-2">TIN</label>
+                      <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                        <input
+                        type="tel"
+                        name="tin"
+                        value={formData.tin}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Document Number *</label>
-                      <input
-                        type="text"
-                        name="documentNumber"
-                        value={formData.documentNumber}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
                         required
-                      />
-                    </div>
-                  </div>
+                        placeholder="Enter TIN number"
+                        />
+                      </div>
+                     </div>
 
-                  {/* Row 2: Issue Date and Expiry Date */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Issue Date</label>
-                      <input
-                        type="text"
-                        name="issueDate"
-                        value={formData.issueDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Expiry Date</label>
-                      <input
-                        type="text"
-                        name="docExpiryDate"
-                        value={formData.docExpiryDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
+                     
+                      {/* status */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Level of Education</label>
+                          <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                            <select
+                              name="education"
+                              value={formData.education}
+                              onChange={handleInputChange}
+                              className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                              required
+                            >
+                              <option value="">Select Level</option>
+                              <option value="primary">Primary</option>
+                              <option value="secondary">Secondary</option>
+                              <option value="high level">High Level</option>
+                            </select>
+                          </div>
+                        </div>
 
-                  {/* Row 3: Issuing Authority and Country */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Issuing Authority</label>
-                      <input
-                        type="text"
-                        name="issuingAuthority"
-                        value={formData.issuingAuthority}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Issuing Country</label>
-                      <input
-                        type="text"
-                        name="issuingCountry"
-                        value={formData.issuingCountry}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
+                        {/* document type */}
+                        <div>
+                          <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Document type</label>
+                          <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                            <select
+                              name="doctype"
+                              value={formData.doctype}
+                              onChange={handleInputChange}
+                              className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                              required
+                            >
+                              <option value="">Select document</option>
+                              <option value="id or passport">ID or Passport</option>
+                              <option value="proof address">Proof of address</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Row 4: Place of Issue and Document Status */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Place of Issue</label>
-                      <input
-                        type="text"
-                        name="placeOfIssue"
-                        value={formData.placeOfIssue}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Document Status</label>
-                      <input
-                        type="text"
-                        name="documentStatus"
-                        value={formData.documentStatus}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 5: Full Name and Date of Birth */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Date of Birth</label>
-                      <input
-                        type="text"
-                        name="docDateOfBirth"
-                        value={formData.docDateOfBirth}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Document Notes */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Document Notes</label>
-                    <textarea
-                      name="documentNotes"
-                      value={formData.documentNotes}
-                      onChange={handleInputChange}
-                      rows="3"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
+                      {/* card number */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">NIDA</label>
+                        <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
+                          <input
+                            type="tel"
+                            name="nida" 
+                            value={formData.nida}
+                            onChange={handleInputChange}
+                            className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
+                            required
+                            placeholder="Enter NIDA number"
+                          />
+                        </div>
+                      </div>
+                   </div>
                 </form>
               </div>
             </div>
@@ -839,172 +802,222 @@ const checkExistingVerification = async (userId) => {
           
                   {/* User Details Preview Card */}
                   <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <FaUser className="text-blue-600" />
                         Personal Information
                       </h2>
                       <button 
                         onClick={() => handleEditSection('user')}
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <FiEdit2 /> Edit
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Gender</p>
-                        <p className="font-medium">{formData.gender || "Not provided"}</p>
+                    
+                    <div className="space-y-6">
+                      {/* Profile Picture Section */}
+                      <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                          {formData.profilePicture ? (
+                            <img 
+                              src={formData.profilePicture} 
+                              alt="Profile" 
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <FaUser className="text-gray-400 w-8 h-8" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Profile Picture</p>
+                          <p className="text-sm text-gray-700">
+                            {formData.profilePicture ? "Uploaded" : "Not uploaded"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Date of Birth</p>
-                        <p className="font-medium">{formData.dateOfBirth || "Not provided"}</p>
+                      
+                      {/* Username Section */}
+                      <div className="pb-4 border-b border-gray-100">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-gray-500">Username</p>
+                          <span className="text-gray-800 font-medium">
+                            {formData.username || "Not provided"}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500">ID Code</p>
-                        <p className="font-medium">{formData.identifyCode || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Hometown</p>
-                        <p className="font-medium">{formData.hometown || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Nationality</p>
-                        <p className="font-medium">{formData.nationality || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Religion</p>
-                        <p className="font-medium">{formData.religion || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Language</p>
-                        <p className="font-medium">{formData.language || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Marital Status</p>
-                        <p className="font-medium">{formData.maritalStatus || "Not provided"}</p>
+                      
+                      {/* Main Information Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Left Column */}
+                        <div className="space-y-4">
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">First Name</p>
+                            <p className="text-gray-800 font-medium">
+                              {formData.firstName || "Not provided"}
+                            </p>
+                          </div>
+                          
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">Last Name</p>
+                            <p className="text-gray-800 font-medium">
+                              {formData.lastName || "Not provided"}
+                            </p>
+                          </div>
+                          
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">Email</p>
+                            <p className="text-gray-800 font-medium truncate">
+                              {formData.email || "Not provided"}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">Mobile</p>
+                            <p className="text-gray-800 font-medium">
+                              {formData.mobile || "Not provided"}
+                            </p>
+                          </div>
+                          
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">Nationality</p>
+                            <p className="text-gray-800 font-medium">
+                              {formData.nationality || "Not provided"}
+                            </p>
+                          </div>
+                          
+                          <div className="pb-3 border-b border-gray-100">
+                            <p className="text-sm text-gray-500 mb-1">Gender</p>
+                            <p className="text-gray-800 font-medium">
+                              {formData.gender || "Not provided"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-          
+
                   {/* Payment Info Preview Card */}
                   <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <FaCreditCard className="text-green-600" />
                         Payment Information
                       </h2>
                       <button 
                         onClick={() => handleEditSection('payment')}
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <FiEdit2 /> Edit
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Cardholder Name</p>
-                        <p className="font-medium">{formData.cardholderName || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Card Type</p>
-                        <p className="font-medium">{formData.cardType || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Card Number</p>
-                        <p className="font-medium">{formData.cardNumber ? `****${formData.cardNumber.slice(-4)}` : "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Expiry Date</p>
-                        <p className="font-medium">{formData.expiryDate || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Bank Name</p>
-                        <p className="font-medium">{formData.bankName || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Account Type</p>
-                        <p className="font-medium">{formData.accountType || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Payment Method</p>
-                        <p className="font-medium">{formData.paymentMethod || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Currency</p>
-                        <p className="font-medium">{formData.currency || "Not provided"}</p>
-                      </div>
-                      <div className="md:col-span-3">
-                        <p className="text-sm text-gray-500">Billing Address</p>
-                        <p className="font-medium">
-                          {formData.billingAddress ? `${formData.billingAddress}, ${formData.billingCity}, ${formData.billingState} ${formData.billingZipCode}` : "Not provided"}
-                        </p>
+                    
+                    <div className="space-y-6">
+                      {/* Card Details Section */}
+                      <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                            {formData.cardType ? (
+                              <span className="text-xs text-white font-bold">
+                                {formData.cardType === 'visa' ? 'VISA' : 
+                                formData.cardType === 'mastercard' ? 'MC' : 
+                                formData.cardType === 'amex' ? 'AMEX' : 'CARD'}
+                              </span>
+                            ) : (
+                              <FaCreditCard className="text-white text-xs" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Primary Card</p>
+                            <p className="font-medium text-gray-800">
+                              {formData.cardNumber ? `•••• •••• •••• ${formData.cardNumber.slice(-4)}` : "No card on file"}
+                            </p>
+                          </div>
+
+                            <div className="h-8 w-px bg-gray-300"/>
+                            <div className="flex flex-wrap items-center gap-4">
+                              <div>
+                                <p className="text-sm text-gray-500">Card holder Name</p>
+                                <p className="font-medium text-gray-800">
+                                  {formData.cardholderName || "Not provided"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="h-8 w-px bg-gray-300"/>
+                           <div className="flex flex-wrap items-center gap-4">
+                             <div>
+                              <p className="text-sm text-gray-500">Expiry Date</p>
+                              <p className="font-medium text-gray-800">
+                                {formData.expiryDate || "Not provided"}
+                              </p>
+                            </div>
+                           </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-          
+
                   {/* Documents Preview Card */}
                   <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <FaFileAlt className="text-purple-600" />
                         Document Information
                       </h2>
                       <button 
                         onClick={() => handleEditSection('document')}
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <FiEdit2 /> Edit
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Document Type</p>
-                        <p className="font-medium">{formData.documentType || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Document Number</p>
-                        <p className="font-medium">{formData.documentNumber || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Issue Date</p>
-                        <p className="font-medium">{formData.issueDate || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Expiry Date</p>
-                        <p className="font-medium">{formData.docExpiryDate || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Issuing Authority</p>
-                        <p className="font-medium">{formData.issuingAuthority || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Issuing Country</p>
-                        <p className="font-medium">{formData.issuingCountry || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Place of Issue</p>
-                        <p className="font-medium">{formData.placeOfIssue || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Document Status</p>
-                        <p className="font-medium">{formData.documentStatus || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Full Name</p>
-                        <p className="font-medium">{formData.fullName || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Date of Birth</p>
-                        <p className="font-medium">{formData.docDateOfBirth || "Not provided"}</p>
-                      </div>
-                      <div className="md:col-span-3">
-                        <p className="text-sm text-gray-500">Document Notes</p>
-                        <p className="font-medium">{formData.documentNotes || "No notes provided"}</p>
+                    
+                    <div className="space-y-6">
+                      {/* Document Header Section */}
+                      <div className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <FaFileAlt className="text-white text-lg" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-4">
+                              <div>
+                                <p className="text-sm text-gray-500">Document Type</p>
+                                <p className="font-medium text-gray-800 text-lg">
+                                  {formData.doctype || "Not specified"}
+                                </p>
+                              </div>
+                              <div className="h-8 w-px bg-gray-300 hidden sm:block"></div>
+                              <div>
+                                <p className="text-sm text-gray-500">TIN</p>
+                                <p className="font-medium text-gray-800 font-mono">
+                                  {formData.nida || "Not provided"}
+                                </p>
+                              </div>
+                              <div className="h-8 w-px bg-gray-300 hidden sm:block"></div>
+                              <div>
+                                <p className="text-sm text-gray-500">NIDA</p>
+                                <p className="font-medium text-gray-800 font-mono">
+                                  {formData.tin || "Not provided"}
+                                </p>
+                              </div>
+                              <div className="h-8 w-px bg-gray-300"/>
+                              <div>
+                                <p className="text-sm text-gray-500">Education</p>
+                                <p className="font-medium text-gray-800 font-mono">
+                                  {formData.education || "Not provided"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-          
+
                   {/* Action Buttons */}
                   <div className="flex gap-4 mb-8">
                    <button

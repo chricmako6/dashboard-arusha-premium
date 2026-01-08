@@ -7,7 +7,7 @@ import ProPay from '@/components/ui02/proPay';
 
 function pageProfile() {
   return (
-    <div className='bg-white rounded-md p-6 mt-4 shadow-md w-[98%] mx-auto'>
+    <div className='bg-white mb-10 rounded-md p-6 mt-4 shadow-md w-[98%] mx-auto'>
       <h2 className='text-lg font-semibold'>Profile Page</h2>
       <div className='flex flex-row gap-4 my-4'>
         {/* Profile content goes here */}

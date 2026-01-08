@@ -10,19 +10,33 @@ function ProDoc() {
       </div>
 
       <div className='mt-4'>
-          <p className='text-sm text-gray-600 mb-2'>Addresss
-            <span className='font-bold text-gray-500 float-end'>chris_dev</span>
-          </p>
-          <p className='text-sm text-gray-600 mb-2'>City
+          <div className='flex gap-4'>
+            <p className='text-sm text-gray-600 mb-2 font-bold'>ID/Passport
+              <span className='font-bold text-gray-500 flex flex-col'>
+                <img
+                  src="/profile-pic.jpg"
+                  alt="Profile Picture"
+                  className="w-40 h-25 rounded-md my-1.5 bg-amber-400"
+                />
+              </span>
+            </p>
+            <p className='text-sm text-gray-600 mb-2 font-bold'>Proof of Address
+              <span className='font-bold text-gray-500 flex flex-col'>
+                <img
+                  src="/profile-pic.jpg"
+                  alt="Profile Picture"
+                  className="w-40 h-25 rounded-md my-1.5 bg-amber-400"
+                />
+              </span>
+            </p>
+          </div>
+          <p className='text-sm text-gray-600 mb-2'>TIN Number
             <span className='font-bold text-gray-500 float-end'>Chris</span>
           </p>
-          <p className='text-sm text-gray-600 mb-2'>Country
+          <p className='text-sm text-gray-600 mb-2'>NIDA
             <span className='font-bold text-gray-500 float-end'>Mak0</span>
           </p>
-          <p className='text-sm text-gray-600 mb-2'>State
-            <span className='font-bold text-gray-500 float-end'>June 10, 2024</span>
-          </p>
-            <p className='text-sm text-gray-600 mb-2'>Zip Code 
+          <p className='text-sm text-gray-600 mb-2'>Education Level
             <span className='font-bold text-gray-500 float-end'>Male</span>
           </p>
         </div>

@@ -400,7 +400,7 @@ function Login() {
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="z-10 w-full max-w-md bg-purple-300 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/10">
+      <div className="z-10 w-full max-w-md bg-[#111118]/60 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/10">
         {/* Tab Navigation */}
         <div className="flex space-x-6 mb-6 justify-center">
           <button

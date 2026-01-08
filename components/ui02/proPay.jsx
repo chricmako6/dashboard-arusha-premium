@@ -30,7 +30,7 @@ function ProPay() {
             <p className='text-sm text-gray-600 mb-2'>Card Number
               <span className='font-bold text-gray-500 float-end'>June 10, 2024</span>
             </p>
-             <p className='text-sm text-gray-600 mb-2'>Balance
+             <p className='text-sm text-gray-600 mb-2'>Status
               <span className='font-bold text-gray-500 float-end'>Male</span>
             </p>
         </div>
