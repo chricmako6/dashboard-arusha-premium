@@ -1,7 +1,7 @@
 "use client"
 import React, {useState, useEffect} from 'react'
 import { FaUser, FaCreditCard, FaFileAlt, FaEye } from "react-icons/fa";
-import { FiLogOut, FiCheckCircle, FiEdit2 } from "react-icons/fi";
+import { FiLogOut, FiCheckCircle, FiEdit2, FiEdit } from "react-icons/fi";
 import { TiTick } from "react-icons/ti";
 import { CgProfile } from "react-icons/cg";
 import { useRouter } from "next/navigation";
@@ -55,7 +55,12 @@ function pageVerification() {
     tin: "",
     nida: "",
     education: "",
+    identifyCode: "",
+    documentNumber: "",
   });
+
+  // Form validation state
+  const [fieldErrors, setFieldErrors] = useState({});
 
  // 🔐 AUTH GUARD with Verification Check
   useEffect(() => {
@@ -559,7 +564,6 @@ const checkExistingVerification = async (userId) => {
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
-                          <option value="Other">Other</option>
                           <option value="Prefer not to say">Prefer not to say</option>
                         </select>
                       </div>
@@ -658,7 +662,7 @@ const checkExistingVerification = async (userId) => {
                           onChange={handleInputChange}
                           className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
                           required
-                          placeholder="Enter your first name"
+                          placeholder="••/••"
                           />
                       </div>
                      </div>
@@ -745,6 +749,10 @@ const checkExistingVerification = async (userId) => {
                               <option value="primary">Primary</option>
                               <option value="secondary">Secondary</option>
                               <option value="high level">High Level</option>
+                              <option value="diploma">Diploma</option>
+                              <option value="bachelor">Bachelor's Degree</option>
+                              <option value="master">Master's Degree</option>
+                              <option value="doctorate">Doctorate</option>
                             </select>
                           </div>
                         </div>
@@ -811,7 +819,7 @@ const checkExistingVerification = async (userId) => {
                         onClick={() => handleEditSection('user')}
                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
-                        <FiEdit2 /> Edit
+                        <FiEdit />
                       </button>
                     </div>
                     
@@ -911,7 +919,7 @@ const checkExistingVerification = async (userId) => {
                         onClick={() => handleEditSection('payment')}
                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
-                        <FiEdit2 /> Edit
+                        <FiEdit />
                       </button>
                     </div>
                     
@@ -971,7 +979,7 @@ const checkExistingVerification = async (userId) => {
                         onClick={() => handleEditSection('document')}
                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                       >
-                        <FiEdit2 /> Edit
+                        <FiEdit />
                       </button>
                     </div>
                     
@@ -1065,12 +1073,7 @@ const checkExistingVerification = async (userId) => {
                     </button>
                   </div>
           
-                  {/* Footer Note */}
-                  <div className="bg-amber-50 border-l-4 border-amber-200 p-4 rounded">
-                    <p className="text-sm text-amber-300">
-                      Please review all information carefully. Click on the edit button next to each section to make corrections.
-                    </p>
-                  </div>
+                 
                 </div>
               )}
             </>
