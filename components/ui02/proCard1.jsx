@@ -15,7 +15,7 @@ function ProCard1({ user, profileData }) {
       <div className='border-b-2 border-gray-200 my-4 pb-4 flex flex-col items-center'>
         <div className='relative'>
            <img
-            src={profileData?.profileImage || "/default-profile.jpg"}
+            src={profileData?.profilePicture || "/default-profile.jpg"}
             alt="Profile Picture"
             className="w-40 h-40 rounded-full mx-auto object-cover border-4 border-amber-100"
             onError={(e) => {

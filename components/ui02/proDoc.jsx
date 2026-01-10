@@ -20,16 +20,16 @@ function ProDoc({ profileData, onEdit }) {
           <div className='flex gap-4'>
             <p className='text-sm text-gray-600 mb-2 font-bold'>{profileData?.doctype || "Not uploaded"}
               <span className='font-bold text-gray-500 flex flex-col'>
-                {profileData?.passport ? (
+                {profileData?.doctype ? (
                   <span className="relative">
                     <img
-                      src={profileData.passport}
+                      src={profileData.doctype}
                       alt="ID/Passport"
                       className="w-full h-48 object-cover rounded-lg cursor-pointer"
-                      onClick={() => setViewingImage(profileData.passport)}
+                      onClick={() => setViewingImage(profileData.doctype)}
                     />
                     <button 
-                      onClick={() => setViewingImage(profileData.passport)}
+                      onClick={() => setViewingImage(profileData.doctype)}
                       className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded"
                     >
                       <FiEye size={16} />
