@@ -1,7 +1,8 @@
 "use client"
 import React, {useState, useEffect} from 'react'
 import { FaUser, FaCreditCard, FaFileAlt, FaEye } from "react-icons/fa";
-import { FiLogOut, FiCheckCircle, FiEdit2, FiEdit } from "react-icons/fi";
+import { FiLogOut, FiCheckCircle, FiEdit } from "react-icons/fi";
+import { AiOutlineCamera } from "react-icons/ai";
 import { TiTick } from "react-icons/ti";
 import { CgProfile } from "react-icons/cg";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,8 @@ import toast from 'react-hot-toast';
 import Approvalwait from '@/components/Application/approvalwait';
 import { doc, getDoc, getFirestore, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { PiDotsThreeOutlineBold } from 'react-icons/pi';
+import { MdPayments } from 'react-icons/md';
+import { IoDocumentAttachOutline } from 'react-icons/io5';
 
 function pageVerification() {
   const router = useRouter(); 
@@ -28,6 +31,9 @@ function pageVerification() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [proofAddressFile, setProofAddressFile] = useState(null);
+  const [showDocTypePopup, setShowDocTypePopup] = useState(false);
 
    // Form data state
   const [formData, setFormData] = useState({
@@ -40,6 +46,7 @@ function pageVerification() {
     nationality: "",
     mobile: "",
     gender: "",
+
     
     // Payment Info
     cardType: "",
@@ -55,12 +62,7 @@ function pageVerification() {
     tin: "",
     nida: "",
     education: "",
-    identifyCode: "",
-    documentNumber: "",
   });
-
-  // Form validation state
-  const [fieldErrors, setFieldErrors] = useState({});
 
  // 🔐 AUTH GUARD with Verification Check
   useEffect(() => {
@@ -157,6 +159,47 @@ function pageVerification() {
     }));
   };
 
+  // THIS IS FOR UPLOADING AN IMAGE
+      const handleImageUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileImage(reader.result);
+          // ALSO update formData
+          setFormData(prev => ({
+            ...prev,
+            profilePicture: reader.result
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Add this function to handle document upload
+    const handleProofAddressUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        setProofAddressFile(file);
+        
+        // Update formData with file name or base64 if needed
+        setFormData(prev => ({
+          ...prev,
+          proofAddress: file.name // or you can store as base64 like the profile
+        }));
+        
+        // If you want to store as base64 for preview:
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData(prev => ({
+            ...prev,
+            proofAddress: reader.result // Store base64 string
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
     const steps = [
     { id: 1, title: "User Details", icon: FaUser },
     { id: 2, title: "Payment Info", icon: FaCreditCard },
@@ -195,6 +238,7 @@ const checkExistingVerification = async (userId) => {
     }
   };
 
+  // THIS IS FOR HANDLE LOGOUT
   const handleLogout = async () => {
   try {
     setIsLoggingOut(true);
@@ -241,58 +285,92 @@ const checkExistingVerification = async (userId) => {
       return true;
       
     } catch (error) {
-      console.error("❌ Firestore save error:", error);
+      console.error("Firestore save error:", error);
       throw new Error(`Failed to save data: ${error.message}`);
     }
   };
 
- const handleSubmit = async (e) => {
-    e?.preventDefault();
-    setSubmitError("");
+  const handleSubmit = async (e) => {
+  e?.preventDefault();
+  setSubmitError("");
+  
+  try {
+    setSubmitting(true);
+    console.log("Starting submission process...");
     
-    try {
-      setSubmitting(true);
-      console.log("Starting submission process...");
-      console.log("Form data submitted:", formData);
+    // VALIDATE ALL REQUIRED FIELDS
+    const requiredFields = {
+      // Personal Info
+      username: "Username",
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      mobile: "Mobile Number",
+      nationality: "Nationality",
+      gender: "Gender",
+      dateBirth: "Date of Birth",
       
-      // Validate form data
-      if (!formData.identifyCode) {
-        setSubmitError("Please fill in required User Details");
-        setSubmitting(false);
-        return;
+      // Payment Info
+      cardType: "Card Type",
+      cardholderName: "Card Holder Name",
+      cardNumber: "Card Number",
+      expiryDate: "Expiry Date",
+      status: "Status",
+      
+      // Document Info
+      tin: "TIN Number",
+      nida: "NIDA Number",
+      education: "Education Level",
+      doctype: "Document Type",
+      proofAddress: "Proof of Address"
+    };
+    
+    // Check for missing required fields
+    const missingFields = [];
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!formData[field]) {
+        missingFields.push(label);
       }
-      
-      if (!formData.documentNumber) {
-        setSubmitError("Please fill in Document Number");
-        setSubmitting(false);
-        return;
-      }
-      
-      console.log("Calling saveToFirestore...");
-      await saveToFirestore();
-      
-      console.log("Submission successful");
-      
-      // Update UI state
+    }
+    
+    if (missingFields.length > 0) {
+      setSubmitError(`Please fill in: ${missingFields.join(', ')}`);
+      toast.error(`Missing fields: ${missingFields.join(', ')}`);
+      setSubmitting(false);
+      return;
+    }
+    
+    console.log("Calling saveToFirestore...");
+    await saveToFirestore();
+    
+    console.log("Submission successful");
+    
+    // Show success toast
+    toast.success('Data has been submitted for verification!');
+    
+    // Update UI state after delay
+    setTimeout(() => {
       setShowForm(false);
       setWaitingForApproval(true);
       setIsVerified(false);
 
-       if (typeof window !== 'undefined') {
-      localStorage.setItem('verificationSubmitted', 'true');
-      localStorage.setItem('verificationUserId', User?.uid || '');
-    }
-      
-    } catch (error) {
-      console.error("Submission error:", error);
-      setSubmitError(error.message || "Failed to submit verification. Please try again.");
-      // Keep the form visible so user can retry
-      setShowForm(false);
-      setWaitingForApproval(false);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('verificationSubmitted', 'true');
+        localStorage.setItem('verificationUserId', User?.uid || '');
+      }
+    }, 1500); // 1.5 second delay
+    
+  } catch (error) {
+    console.error("Submission error:", error);
+    setSubmitError(error.message || "Failed to submit verification. Please try again.");
+    toast.error('Submission failed. Please try again.');
+    // Keep the form visible so user can retry
+    setShowForm(true);
+    setWaitingForApproval(false);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleEditSection = (section) => {
     switch(section) {
@@ -425,20 +503,36 @@ const checkExistingVerification = async (userId) => {
                 </div>
 
                 <form className="space-y-6">
-                  {/* Row 1: Gender and Date of Birth */}
-                 {/* Profile Picture */}
-                  <div className="text-center border-b-2 pb-6 mb-6">
-                    <div className="flex flex-col items-center">
-                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
+                  {/* Profile Picture */}
+                    <div className="text-center border-b-2 pb-6 mb-6">
+                      <div className="flex flex-col items-center">
+                        <div className="relative">
+                          {profileImage ? (
+                            <img
+                              src={profileImage}
+                              alt="Profile"
+                              className="w-35 h-35 rounded-full object-cover border-4 border-white shadow-md"
+                            />
+                          ) : (
+                            <CgProfile className="w-35 h-35 rounded-full text-gray-400" />
+                          )}
+                          <label
+                            htmlFor="profile-upload"
+                            className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition"
+                          >
+                            <AiOutlineCamera className="w-5 h-5" />
+                          </label>
+                        </div>
                         <input
                           type="file"
                           accept="image/*"
                           className="hidden"
                           id="profile-upload"
+                          onChange={handleImageUpload}
                         />
+                      </div>
+                      <h2 className="my-2 text-md font-bold text-gray-700">Upload Profile Picture</h2>
                     </div>
-                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Profile Picture</h2>
-                  </div>
                   {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
@@ -587,7 +681,7 @@ const checkExistingVerification = async (userId) => {
                  {/* Profile Picture */}
                   <div className="text-center border-b-2 pb-6 mb-6">
                     <div className="flex flex-col items-center">
-                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
+                      <MdPayments htmlFor="profile-upload" className="mx-auto cursor-pointer w-55 h-40 my-1.5 text-gray-300" />
                         <input
                           type="file"
                           accept="image/*"
@@ -595,7 +689,7 @@ const checkExistingVerification = async (userId) => {
                           id="profile-upload"
                         />
                     </div>
-                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Profile Picture</h2>
+                    <h2 className="my-2 text-md font-bold text-gray-700">Waiting for your Payment Info</h2>
                   </div>
                   {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
@@ -701,20 +795,69 @@ const checkExistingVerification = async (userId) => {
                 </div>
 
                 <form className="space-y-6">
-                  {/* Row 1: Gender and Date of Birth */}
                  {/* Profile Picture */}
                   <div className="text-center border-b-2 pb-6 mb-6">
-                    <div className="flex flex-col items-center">
-                      <CgProfile  htmlFor="profile-upload" className="mx-auto cursor-pointer w-35 h-35 rounded-full my-1.5 text-gray-500" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          id="profile-upload"
-                        />
-                    </div>
-                    <h2 className="my-2 text-md font-bold text-gray-700">Upload Proof of Address</h2>
+                  <div className="flex flex-col items-center">
+                    <label htmlFor="proof-address-upload" className="cursor-pointer">
+                      {formData.proofAddress ? (
+                        // Show preview if file is uploaded
+                        <div className="relative">
+                          {/* Check if it's an image or document */}
+                          {formData.proofAddress.startsWith('data:image/') ? (
+                            // Image preview
+                            <img 
+                              src={formData.proofAddress} 
+                              alt="Proof of Address" 
+                              className="w-35 h-35 object-cover rounded-lg border border-gray-300 shadow-sm"
+                            />
+                          ) : (
+                            // Document preview (showing file icon)
+                            <div className="w-35 h-35 bg-yellow-50 rounded-lg border border-yellow-200 flex flex-col items-center justify-center p-4">
+                              <IoDocumentAttachOutline className="text-blue-500 w-16 h-16 mb-2" />
+                              <span className="text-xs text-gray-600 truncate max-w-full px-2">
+                                {proofAddressFile?.name || "Document uploaded"}
+                              </span>
+                            </div>
+                          )}
+                          {/* Change/Upload overlay */}
+                          <div className="absolute inset-0 bg-black  rounded-lg transition-all duration-200 flex items-center justify-center">
+                            <AiOutlineCamera className="text-white text-2xl opacity-0 hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      ) : (
+                        // Default upload icon
+                        <div className="w-45 h-35 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-200">
+                          <IoDocumentAttachOutline className="text-gray-400 w-20 h-20 mb-2" />
+                          <p className="text-xs text-gray-500">Click to upload</p>
+                          <p className="text-xs text-gray-400">(JPG, PNG, PDF, DOC)</p>
+                        </div>
+                      )}
+                    </label>
+                    
+                    <input
+                      type="file"
+                      accept="image/*,.pdf,.doc,.docx,.txt" // Accept both images and documents
+                      className="hidden"
+                      id="proof-address-upload"
+                      onChange={handleProofAddressUpload}
+                    />
                   </div>
+                  
+                  <h2 className="my-2 text-md font-bold text-gray-700">Upload Proof of Address</h2>
+                  
+                  {/* File info display */}
+                  {proofAddressFile && (
+                    <div className="mt-2 p-2 bg-green-50 rounded-lg">
+                      <span className="text-xs text-green-700 flex items-center justify-center gap-1">
+                        <FiCheckCircle className="text-green-500" />
+                        Uploaded: {proofAddressFile.name}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Size: {(proofAddressFile.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  )}
+                </div>
                   {/* Row 2: Name and Mobile Number */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
@@ -826,30 +969,30 @@ const checkExistingVerification = async (userId) => {
                     <div className="space-y-6">
                       {/* Profile Picture Section */}
                       <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
-                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                        <div className="w-40 h-40 bg-gray-200 rounded-full flex items-center justify-center">
                           {formData.profilePicture ? (
                             <img 
                               src={formData.profilePicture} 
                               alt="Profile" 
-                              className="w-full h-full rounded-full object-cover"
+                              className="w-40 h-40 rounded-full object-cover"
                             />
                           ) : (
-                            <FaUser className="text-gray-400 w-8 h-8" />
+                            <FaUser className="text-gray-400 w-10 h-10" />
                           )}
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Profile Picture</p>
                           <p className="text-sm text-gray-700">
-                            {formData.profilePicture ? "Uploaded" : "Not uploaded"}
+                            {formData.profilePicture ? "Uploaded" : <span className="bg-red-100 text-red-800 p-1 rounded-full text-xs">Not uploaded</span>}
                           </p>
                         </div>
                       </div>
                       
                       {/* Username Section */}
                       <div className="pb-4 border-b border-gray-100">
-                        <div className="flex justify-between items-center">
+                        <div className="flex">
                           <p className="text-sm text-gray-500">Username</p>
-                          <span className="text-gray-800 font-medium">
+                          <span className="text-gray-800 font-medium flex-end ml-5">
                             {formData.username || "Not provided"}
                           </span>
                         </div>
@@ -859,21 +1002,21 @@ const checkExistingVerification = async (userId) => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Left Column */}
                         <div className="space-y-4">
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">First Name</p>
                             <p className="text-gray-800 font-medium">
                               {formData.firstName || "Not provided"}
                             </p>
                           </div>
                           
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Last Name</p>
                             <p className="text-gray-800 font-medium">
                               {formData.lastName || "Not provided"}
                             </p>
                           </div>
                           
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Email</p>
                             <p className="text-gray-800 font-medium truncate">
                               {formData.email || "Not provided"}
@@ -883,21 +1026,21 @@ const checkExistingVerification = async (userId) => {
                         
                         {/* Right Column */}
                         <div className="space-y-4">
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Mobile</p>
                             <p className="text-gray-800 font-medium">
                               {formData.mobile || "Not provided"}
                             </p>
                           </div>
                           
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Nationality</p>
                             <p className="text-gray-800 font-medium">
                               {formData.nationality || "Not provided"}
                             </p>
                           </div>
                           
-                          <div className="pb-3 border-b border-gray-100">
+                          <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Gender</p>
                             <p className="text-gray-800 font-medium">
                               {formData.gender || "Not provided"}
@@ -989,6 +1132,7 @@ const checkExistingVerification = async (userId) => {
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
                             <FaFileAlt className="text-white text-lg" />
+                            {formData.proofAddress }
                           </div>
                           <div className="flex-1">
                             <div className="flex flex-wrap items-center gap-4">
@@ -1028,30 +1172,13 @@ const checkExistingVerification = async (userId) => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-4 mb-8">
-                   <button
+                  <button
                       type="button"
-                      onClick={() => {
-                        // Check validation before calling handleSubmit
-                        if (!formData.identifyCode || !formData.documentNumber) {
-                          toast.error('You can`t submit empty fields. Please fill all required fields!');
-                          return;
-                        }
-                        
-                        handleSubmit();
-                        
-                        // Show success toast after submission
-                        setTimeout(() => {
-                          if (!submitting && !waitingForApproval && !submitError) {
-                            if (isApproved) {
-                              toast.success('Verification Complete!');
-                            } else {
-                              toast.success('Data has been submitted for verification!');
-                            }
-                          }
-                        }, 120);
+                      onClick={(e) => {
+                        handleSubmit(e);
                       }}
                       disabled={submitting || waitingForApproval}
-                      className="flex-1 bg-linear-to-r from-amber-200 to-amber-300 hover:from-amber-500 hover:to-amber-500 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex-1 cursor-pointer bg-gradient-to-r from-amber-200 to-amber-300 hover:from-amber-500 hover:to-amber-500 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {submitting ? (
                         <>
