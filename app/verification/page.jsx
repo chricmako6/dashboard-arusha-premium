@@ -33,7 +33,6 @@ function pageVerification() {
   const [isVerified, setIsVerified] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [proofAddressFile, setProofAddressFile] = useState(null);
-  const [showDocTypePopup, setShowDocTypePopup] = useState(false);
 
    // Form data state
   const [formData, setFormData] = useState({
@@ -775,8 +774,8 @@ const checkExistingVerification = async (userId) => {
                           required
                         >
                           <option value="">Select status</option>
-                          <option value="Tanzania">Active</option>
-                          <option value="Kenya">Pending</option>
+                          <option value="active">Active</option>
+                          <option value="pending">Pending</option>
                         </select>
                       </div>
                     </div>
@@ -1018,7 +1017,7 @@ const checkExistingVerification = async (userId) => {
                           
                           <div className="pb-3 border-b border-gray-100 flex justify-between">
                             <p className="text-sm text-gray-500 mb-1">Email</p>
-                            <p className="text-gray-800 font-medium truncate">
+                            <p className="text-gray-800 font-medium truncate w-[160px]">
                               {formData.email || "Not provided"}
                             </p>
                           </div>
@@ -1130,10 +1129,72 @@ const checkExistingVerification = async (userId) => {
                       {/* Document Header Section */}
                       <div className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-                            <FaFileAlt className="text-white text-lg" />
-                            {formData.proofAddress }
+                          {/* Document Icon with Hover Preview */}
+                          <div className="relative group">
+                            
+                            {/* Hover Tooltip - Now shows actual document preview */}
+                            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 opacity-0 group-hover:opacity-100 group-hover:visible invisible transition-all duration-200 transform group-hover:translate-x-0 translate-x-2 z-50">
+                              <div className="bg-gray-800 rounded-lg p-2 shadow-2xl border border-gray-700">
+                                {/* Document Preview */}
+                                {formData.proofAddress ? (
+                                  <div className="max-w-xs">
+                                    {/* Check if it's an image */}
+                                    {formData.proofAddress.startsWith('data:image/') ? (
+                                      <div>
+                                        <div className="font-semibold text-amber-100 text-xs mb-1">Document Preview:</div>
+                                        <div className="bg-black/50 p-1 rounded">
+                                          <img 
+                                            src={formData.proofAddress} 
+                                            alt="Document Preview" 
+                                            className="w-full max-w-[240px] h-auto max-h-[160px] object-contain rounded"
+                                            onError={(e) => {
+                                              e.target.onerror = null;
+                                              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3Cpolyline points='10 9 9 9 8 9'%3E%3C/polyline%3E%3C/svg%3E";
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="mt-1 text-xs text-gray-300 flex items-center justify-between">
+                                          <span className="flex items-center gap-1">
+                                            <FiCheckCircle className="text-green-400" />
+                                            {formData.doctype || "Document"}
+                                          </span>
+                                          {proofAddressFile && (
+                                            <span className="text-gray-400">
+                                              {(proofAddressFile.size / 1024).toFixed(2)} KB
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      /* If it's not an image, show document icon with info */
+                                      <div className="flex flex-col items-center p-3">
+                                        <IoDocumentAttachOutline className="text-blue-400 w-12 h-12 mb-2" />
+                                        <div className="font-semibold text-amber-100 text-sm">Document Uploaded</div>
+                                        <div className="text-xs text-gray-300 text-center mt-1">
+                                          {formData.doctype || "Document Type"}
+                                        </div>
+                                        {proofAddressFile && (
+                                          <div className="text-xs text-gray-400 mt-2">
+                                            File: {proofAddressFile.name}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="p-3 text-center">
+                                    <div className="text-red-300 text-sm">No document uploaded</div>
+                                  </div>
+                                )}
+                                
+                                {/* Tooltip arrow */}
+                                <div className="absolute right-full top-1/2 -translate-y-1/2">
+                                  <div className="w-0 h-0 border-t-4 border-b-4 border-l-0 border-r-4 border-r-gray-800 border-t-transparent border-b-transparent"></div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
+                          
                           <div className="flex-1">
                             <div className="flex flex-wrap items-center gap-4">
                               <div>
@@ -1166,6 +1227,64 @@ const checkExistingVerification = async (userId) => {
                             </div>
                           </div>
                         </div>
+                        
+                        {/* Document Preview Section (if document is uploaded) */}
+                        {formData.proofAddress && (
+                          <div className="mt-4">
+                            <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Document Preview:</p>
+                            <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                              {formData.proofAddress.startsWith('data:image/') ? (
+                                /* Image Preview */
+                                <div className="flex flex-col items-center">
+                                  <div className="relative bg-white p-2 rounded border border-gray-300 shadow-sm">
+                                    <img 
+                                      src={formData.proofAddress} 
+                                      alt="Uploaded Document" 
+                                      className="max-w-full h-auto max-h-[200px] object-contain"
+                                      onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3Cpolyline points='10 9 9 9 8 9'%3E%3C/polyline%3E%3C/svg%3E";
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <div className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full flex items-center gap-1">
+                                      <FiCheckCircle className="text-xs" />
+                                      Image Document Uploaded
+                                    </div>
+                                    {proofAddressFile && (
+                                      <div className="text-xs text-gray-500">
+                                        Size: {(proofAddressFile.size / 1024).toFixed(2)} KB
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                /* Non-image Document Preview */
+                                <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+                                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                    <IoDocumentAttachOutline className="text-white w-8 h-8" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="font-medium text-gray-800">Document Uploaded</p>
+                                    <p className="text-sm text-gray-600">
+                                      Type: {formData.doctype || "Document"}
+                                    </p>
+                                    {proofAddressFile && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        File: {proofAddressFile.name} • {(proofAddressFile.size / 1024).toFixed(2)} KB
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="text-xs px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                                    <FiCheckCircle className="inline mr-1" />
+                                    Ready
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { signOut } from 'firebase/auth';
 import { useRouter } from "next/navigation";
 
-function Navbar({ displayName, profileImage }) {
+function NavbarAdmin() {
    const router = useRouter(); 
    const [isLoggingOut, setIsLoggingOut] = useState(false);
    const [User, setUser] = useState(null);
@@ -73,18 +73,10 @@ function Navbar({ displayName, profileImage }) {
 
         <div className='relative group flex gap-2 cursor-pointer'>
           <div className="flex flex-col">
-            <span className='text-xs leading-2 mt-2 font-bold'>{displayName}</span>
-            <span className='text-xs leading-2 text-gray-500 my-2'>Welcome User</span>
+            <span className='text-xs leading-3 font-medium'>Chriss Mac</span>
+            <span className='text-[10px] text-gray-500 text-right'>Admin</span>
           </div>
-          <img 
-            src={profileImage || '/profile2.svg'}
-            alt='profile'
-            className='bg-white rounded-full w-10 h-10 object-cover'
-            onError={(e) => {
-              e.target.src = '/profile2.svg';
-              e.target.onerror = null;
-            }}
-          />
+          <Image src='/profile2.svg' alt='profile' width={25} height={25} className='bg-white rounded-full w-8 h-8'/>
         
            {/* Dropdown */}
           <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
@@ -100,4 +92,4 @@ function Navbar({ displayName, profileImage }) {
     </div>
   );
 }
-export default Navbar;
+export default NavbarAdmin;

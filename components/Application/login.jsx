@@ -12,7 +12,6 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import Approvalemail from "./approvalemail";
 import toast from "react-hot-toast";
 import { PiDotsThreeOutlineBold } from "react-icons/pi";
 
@@ -29,6 +28,7 @@ function Login() {
   const [error, setError] = useState("");
   const [verificationEmailSent, setVerificationEmailSent] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+
 
   // Check if user is already logged in and verified
   useEffect(() => {
@@ -383,17 +383,6 @@ function Login() {
     } catch (error) {
       console.error("Error resending verification:", error);
       setError("Failed to resend verification email.");
-    }
-  };
-
-  // ✅ NEW: Function to close verification overlay
-  const handleCloseVerification = () => {
-    setAwaitingVerification(false);
-    // Clear form for better UX
-    if (activeTab === "signup") {
-      setNameInput("");
-      setEmailSignUp("");
-      setPasswordSignUp("");
     }
   };
 
