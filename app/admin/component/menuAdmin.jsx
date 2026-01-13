@@ -25,6 +25,7 @@ const menuItems = [
       { icon: "/lesson.svg", name: "Report", link: "/admin/report" },
       { icon: "/event.svg", name: "Events", link: "/admin/event" },
       { icon: "/announcement.svg", name: "Announcements", link: "/admin/announcement" },
+      { icon: "/users1.svg", name: "Users", link: "/admin/users" },
     ],
   },
   {

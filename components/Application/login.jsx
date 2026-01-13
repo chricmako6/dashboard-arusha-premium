@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
@@ -13,7 +14,6 @@ import {
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
-import { PiDotsThreeOutlineBold } from "react-icons/pi";
 
 function Login() {
   const router = useRouter();
@@ -23,12 +23,11 @@ function Login() {
   const [passwordSignUp, setPasswordSignUp] = useState("");
   const [emailLogin, setEmailLogin] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // FIXED: Changed to setIsLoading
   const [awaitingVerification, setAwaitingVerification] = useState(false);
   const [error, setError] = useState("");
   const [verificationEmailSent, setVerificationEmailSent] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
-
 
   // Check if user is already logged in and verified
   useEffect(() => {
@@ -134,7 +133,7 @@ function Login() {
       };
       
       // Step 2: Send the sign-in link to the user's email
-      await sendEmailVerification(auth, userCredential, actionCodeSettings);
+      await sendEmailVerification(userCredential.user, actionCodeSettings);
       
       // Step 3: Save the email locally (important for completing sign-in)
       window.localStorage.setItem('emailForSignIn', emailSignUp);
@@ -159,15 +158,22 @@ function Login() {
       let errorMessage = error.message;
       
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = toast("This email is already registered. Please sign in instead.");
+        toast.error("This email is already registered. Please sign in instead.");
+        errorMessage = "This email is already registered. Please sign in instead.";
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = toast("Please enter a valid email address.");
+        toast.error("Please enter a valid email address.");
+        errorMessage = "Please enter a valid email address.";
       } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = toast("Email link sign-in is not enabled. Please contact support.");
+        toast.error("Email link sign-in is not enabled. Please contact support.");
+        errorMessage = "Email link sign-in is not enabled. Please contact support.";
       } else if (error.code === 'auth/network-request-failed') {
-        errorMessage = toast("Network error. Please check your internet connection.");
+        toast.error("Network error. Please check your internet connection.");
+        errorMessage = "Network error. Please check your internet connection.";
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = toast("Too many requests. Please try again later.");
+        toast.error("Too many requests. Please try again later.");
+        errorMessage = "Too many requests. Please try again later.";
+      } else {
+        toast.error(error.message);
       }
       
       setError(errorMessage);
@@ -178,7 +184,7 @@ function Login() {
 
   // ✅ UPDATED: Handle sign in with verification check
   const handleSignInClick = async () => {
-    if (!isLoginValid)return;
+    if (!isLoginValid) return;
     
     try {
       setIsLoading(true);
@@ -204,14 +210,13 @@ function Login() {
           handleCodeInApp: true
         };
         
-        await sendSignInLinkToEmail(auth, emailSignUp, actionCodeSettings);
+        await sendEmailVerification(user, actionCodeSettings);
 
-        window.localStorage.setItem('emailForSignIn', emailSignUp);
+        window.localStorage.setItem('emailForSignIn', user.email);
         
         // Show verification overlay
         setAwaitingVerification(true);
         setCurrentUserEmail(user.email);
-        setShowApprovalEmail(true);
         setError("Please verify your email. We've sent a new verification email.");
         setIsLoading(false);
         return;
@@ -257,6 +262,7 @@ function Login() {
       }
       
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -318,7 +324,7 @@ function Login() {
       } else if (provider === "apple") {
         // Note: Apple Sign-In requires additional setup
         setError("Apple Sign-In is not configured yet. Please use Google or email.");
-        setIsLoading(false);
+        toast.error("Apple Sign-In is not configured yet. Please use Google or email.");
       }
       
     } catch (error) {
@@ -339,6 +345,7 @@ function Login() {
       }
       
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -348,16 +355,20 @@ function Login() {
   const handleForgotPassword = async () => {
     if (!emailLogin.trim()) {
       setError("Please enter your email address to reset password.");
+      toast.error("Please enter your email address to reset password.");
       return;
     }
     
     try {
       const auth = getAuth();
       await sendPasswordResetEmail(auth, emailLogin);
-      setError(`Password reset email sent to ${emailLogin}. Please check your inbox.`);
+      const message = `Password reset email sent to ${emailLogin}. Please check your inbox.`;
+      setError(message);
+      toast.success("Password reset email sent!");
     } catch (error) {
       console.error("Password reset error:", error);
       setError("Failed to send reset email. Please check your email address.");
+      toast.error("Failed to send reset email. Please check your email address.");
     }
   };
 
@@ -379,14 +390,15 @@ function Login() {
       
       await sendEmailVerification(user, actionCodeSettings);
       setError("Verification email resent! Please check your inbox.");
+      toast.success("Verification email resent!");
       
     } catch (error) {
       console.error("Error resending verification:", error);
       setError("Failed to resend verification email.");
+      toast.error("Failed to resend verification email.");
     }
   };
 
-  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="z-10 w-full max-w-md bg-[#111118]/60 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/10">
@@ -427,7 +439,7 @@ function Login() {
         {/* Error Message Display */}
         {error && (
           <div className={`mb-4 p-3 rounded-xl text-sm ${
-            error.includes("sent") 
+            error.includes("sent") || error.includes("Check your email") 
               ? "bg-green-500/20 border border-green-500 text-green-400"
               : "bg-red-500/20 border border-red-500 text-red-400"
           }`}>

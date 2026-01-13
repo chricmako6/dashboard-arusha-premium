@@ -5,6 +5,7 @@ import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import Sidebar from "@/components/ui01/Sidebar";
 import Navbar from "@/components/ui01/Navbar";
 import { auth } from '@/lib/firebase';
+import { PiDotsThreeOutlineBold } from 'react-icons/pi';
 
 function DashboardLayout({ children }) {
   const [user, setUser] = useState(null);
@@ -41,11 +42,13 @@ function DashboardLayout({ children }) {
   // Optional: Show loading state
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center">
+        <div className="text-gray-700 flex items-center">
+          Loading<span className='animate-pulse ml-1'><PiDotsThreeOutlineBold className="w-10 h-10"/></span>
+        </div>
       </div>
-    );
-  }
+    )
+    }
 
   return (
     <div className="flex h-full bg-gray-100 text-gray-900">

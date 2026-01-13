@@ -11,6 +11,7 @@ import AttendanceChart from '@/components/ui01/AttendanceChart'
 import FinanceChart from '@/components/ui01/FinanceChart'
 import EventCalendar from '@/components/ui01/EventCalendar'
 import Announcement from '@/components/ui01/Announcement'
+import { PiDotsThreeOutlineBold } from 'react-icons/pi';
 
 function Admin() {
   const router = useRouter();
@@ -55,13 +56,16 @@ function Admin() {
       return () => unsubscribeAuth();
     }, [router]);
 
-    if (loading) {
-      return (
-        <div className="fixed inset-0 z-50 bg-gray-100 flex items-center justify-center">
-          <div className="text-gray-700">Loading...</div>
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center">
+        <div className="text-gray-700 flex items-center">
+            Loading<span className='animate-pulse ml-1'><PiDotsThreeOutlineBold className="w-10 h-10 "/></span>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
     <div className='flex md:flex-row flex-col gap-4 p-4'>

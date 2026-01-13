@@ -77,7 +77,7 @@ function pageProfile() {
 
   if (loading) {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center">
       <div className="text-gray-700 flex items-center">
         Loading<span className='animate-pulse ml-1'><PiDotsThreeOutlineBold className="w-10 h-10"/></span>
       </div>

@@ -66,9 +66,9 @@ function pageAuth() {
   //   return <Firstwait />;
   // }
 
-  if (!canAccess) {
-    return null;
-  }
+  // if (!canAccess) {
+  //   return null;
+  // }
 
   return (
     <div className='bg-gray-200'>
