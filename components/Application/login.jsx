@@ -12,6 +12,7 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
 } from "firebase/auth";
+import { auth, sendVerificationEmail } from "@/lib/firebase";
 import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
@@ -26,8 +27,15 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false); // FIXED: Changed to setIsLoading
   const [awaitingVerification, setAwaitingVerification] = useState(false);
   const [error, setError] = useState("");
-  const [verificationEmailSent, setVerificationEmailSent] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+
+  // Password Validation Logic
+  const validatePassword = (pass) => {
+    if (pass.length < 8) return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter.";
+    if (!/[0-9]/.test(pass)) return "Password must contain at least one number.";
+    return null;
+  };
 
   // Check if user is already logged in and verified
   useEffect(() => {
@@ -111,158 +119,60 @@ function Login() {
   };
 
   // ✅ UPDATED: Handle sign up with EMAIL LINK verification (Magic Link)
-  const handleSignUp = async () => {
-    if (!isSignUpValid) 
+   const handleSignUp = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    // Basic Field Check
+    if (!emailSignUp || !passwordSignUp || !nameInput) {
+      setError("Please fill all fields.");
       return;
+    }
+
+    // Password Validation Check
+    const passError = validatePassword(passwordSignUp);
+    if (passError) {
+      setError(passError);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      setError("");
-      setVerificationEmailSent(true);
-      
-      const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        emailSignUp, 
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        emailSignUp,
         passwordSignUp
       );
-      
-      // Step 1: Configure the email action settings
-      const actionCodeSettings = {
-        url: `${window.location.origin}/auth`, // Page where user will complete sign-in
-        handleCodeInApp: true, // Important: must be true for email link sign-in
-      };
-      
-      // Step 2: Send the sign-in link to the user's email
-      await sendEmailVerification(userCredential.user, actionCodeSettings);
-      
-      // Step 3: Save the email locally (important for completing sign-in)
-      window.localStorage.setItem('emailForSignIn', emailSignUp);
-      
-      // Step 4: Show success message to user
-      setError("Check your email for the verification link! Click the link to complete sign up.");
-      setVerificationEmailSent(true);
-      
-      // Step 5: Show verification overlay
-      setAwaitingVerification(true);
-      setCurrentUserEmail(emailSignUp);
-      
-      // Clear the form for better UX
-      setNameInput("");
-      setEmailSignUp("");
-      setPasswordSignUp("");
-      
-    } catch (error) {
-      console.error("Email link sign up error:", error);
-      
-      // Handle specific Firebase errors
-      let errorMessage = error.message;
-      
-      if (error.code === 'auth/email-already-in-use') {
-        toast.error("This email is already registered. Please sign in instead.");
-        errorMessage = "This email is already registered. Please sign in instead.";
-      } else if (error.code === 'auth/invalid-email') {
-        toast.error("Please enter a valid email address.");
-        errorMessage = "Please enter a valid email address.";
-      } else if (error.code === 'auth/operation-not-allowed') {
-        toast.error("Email link sign-in is not enabled. Please contact support.");
-        errorMessage = "Email link sign-in is not enabled. Please contact support.";
-      } else if (error.code === 'auth/network-request-failed') {
-        toast.error("Network error. Please check your internet connection.");
-        errorMessage = "Network error. Please check your internet connection.";
-      } else if (error.code === 'auth/too-many-requests') {
-        toast.error("Too many requests. Please try again later.");
-        errorMessage = "Too many requests. Please try again later.";
-      } else {
-        toast.error(error.message);
-      }
-      
-      setError(errorMessage);
+
+      const user = userCredential.user;
+      await updateProfile(user, { displayName: nameInput });
+      await sendVerificationEmail(user);
+
+      toast.success("Account created! Please verify your email.");
+      router.replace("/verification");
+    } catch (err) {
+      const message = err.code === 'auth/email-already-in-use' 
+        ? "This email is already registered." 
+        : (err.message || "Signup failed");
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ✅ UPDATED: Handle sign in with verification check
-  const handleSignInClick = async () => {
-    if (!isLoginValid) return;
-    
+  // ✅ UPDATED: Handle login with verification check
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
-      setIsLoading(true);
-      setError("");
-      
-      const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        emailLogin, 
-        passwordLogin
-      );
-      
-      const user = userCredential.user;
-      
-      // Update user document
-      await createUserDocument(user);
-      
-      // Check if email is verified
-      if (!user.emailVerified) {
-        // Send verification email again
-        const actionCodeSettings = {
-          url: `${window.location.origin}/auth?verified=true`,
-          handleCodeInApp: true
-        };
-        
-        await sendEmailVerification(user, actionCodeSettings);
-
-        window.localStorage.setItem('emailForSignIn', user.email);
-        
-        // Show verification overlay
-        setAwaitingVerification(true);
-        setCurrentUserEmail(user.email);
-        setError("Please verify your email. We've sent a new verification email.");
-        setIsLoading(false);
-        return;
-      }
-      
-      // Check user status in Firestore
-      const db = getFirestore();
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        if (userData.status === "pending_verification") {
-          // Update status to verified
-          await setDoc(doc(db, "users", user.uid), {
-            emailVerified: true,
-            status: "verified",
-            lastLogin: serverTimestamp()
-          }, { merge: true });
-        }
-      }
-      
-      // Redirect to verification page (profile completion)
+      await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
+      toast.success("Welcome back!");
       router.push("/verification");
-      
-    } catch (error) {
-      console.error("Sign in error:", error);
-      
-      let errorMessage = "Failed to sign in. Please try again.";
-      
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = "No account found with this email.";
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = "Incorrect password.";
-      } else if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password.";
-      } else if (error.code === 'auth/user-disabled') {
-        errorMessage = "This account has been disabled.";
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Too many failed attempts. Please try again later.";
-      } else if (error.code === 'auth/email-not-verified') {
-        errorMessage = "Email not verified. Please check your inbox.";
-      }
-      
-      setError(errorMessage);
-      toast.error(errorMessage);
+    } catch (err) {
+      setError("Invalid credentials.");
+      toast.error("Wrong credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -415,7 +325,7 @@ function Login() {
                 : "text-gray-400 border-transparent hover:text-white"
             }`}
           >
-            Sign up
+            Sign Up
           </button>
           <button
             onClick={() => {
@@ -428,7 +338,7 @@ function Login() {
                 : "text-gray-400 border-transparent hover:text-white"
             }`}
           >
-            Sign in
+            Sign In
           </button>
         </div>
         
@@ -436,24 +346,7 @@ function Login() {
           {activeTab === "signup" ? "Create an account" : "Welcome back"}
         </h2>
 
-        {/* Error Message Display */}
-        {error && (
-          <div className={`mb-4 p-3 rounded-xl text-sm ${
-            error.includes("sent") || error.includes("Check your email") 
-              ? "bg-green-500/20 border border-green-500 text-green-400"
-              : "bg-red-500/20 border border-red-500 text-red-400"
-          }`}>
-            {error}
-          </div>
-        )}
-
-        {/* Success Message for Verification */}
-        {verificationEmailSent && !error && (
-          <div className="mb-4 p-3 bg-green-500/20 border border-green-500 rounded-xl text-green-400 text-sm">
-            Verification email sent! Please check your inbox.
-          </div>
-        )}
-
+        
         <div className="space-y-4">
           {activeTab === "signup" && (
             <>
@@ -532,9 +425,9 @@ function Login() {
               </div>
 
               <button
-                onClick={handleSignInClick}
+                onClick={handleEmailLogin}
                 disabled={isLoading || !isLoginValid}
-                className="w-full hover:bg-amber-200 bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl py-3 transition-colors"
+                className="w-full cursor-pointer hover:bg-amber-200 bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl py-3 transition-colors"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </button>
