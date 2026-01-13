@@ -101,6 +101,8 @@ function Login() {
           createdAt: serverTimestamp(),
           lastLogin: serverTimestamp(),
           status: user.emailVerified ? "verified" : "pending_verification",
+          isVerified: false, 
+          isAdmin: false,
           ...additionalData
         });
       } else {
@@ -147,6 +149,15 @@ function Login() {
       const user = userCredential.user;
       await updateProfile(user, { displayName: nameInput });
       await sendVerificationEmail(user);
+
+      // CREATE USER DOCUMENT IN FIRESTORE
+      await createUserDocument(user, {
+        provider: "email",
+        emailVerified: false,
+        isVerified: false, // THIS WILL COME TO HELP THE ADMIN
+        isAdmin: false,
+        status: "pending_verification"
+      });
 
       toast.success("Account created! Please verify your email.");
       router.replace("/verification");
@@ -208,6 +219,8 @@ function Login() {
           provider: "google",
           // Social login emails are already verified by provider
           emailVerified: true,
+          isVerified: true,
+          isAdmin: false,
           status: "verified"
         });
         

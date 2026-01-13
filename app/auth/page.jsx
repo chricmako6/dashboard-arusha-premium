@@ -61,10 +61,10 @@ function pageAuth() {
     );
   }
 
-  // if (showWaiting) {
-  //   // Render Firstwait component directly
-  //   return <Firstwait />;
-  // }
+  if (showWaiting) {
+    // Render Firstwait component directly
+    return <Firstwait />;
+  }
 
   // if (!canAccess) {
   //   return null;
