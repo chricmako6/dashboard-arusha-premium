@@ -52,7 +52,7 @@ function pageVerification() {
     cardholderName: "",
     cardNumber: "",
     expiryDate: "",
-    status: "",
+    stat: "",
     
     // Documents
     passport: "",
@@ -314,7 +314,7 @@ const checkExistingVerification = async (userId) => {
       cardholderName: "Card Holder Name",
       cardNumber: "Card Number",
       expiryDate: "Expiry Date",
-      status: "Status",
+      stat: "stat",
       
       // Document Info
       tin: "TIN Number",
@@ -767,8 +767,8 @@ const checkExistingVerification = async (userId) => {
                       <label className="flex-start text-sm font-semibold text-gray-700 mb-2">Status</label>
                       <div className="md:flex items-center bg-gray-100 p-1 rounded-xl ring-gray-300 px-2">
                         <select
-                          name="status"
-                          value={formData.status}
+                          name="stat"
+                          value={formData.stat}
                           onChange={handleInputChange}
                           className="ml-2 text-black text-xs p-2 w-full border-none bg-transparent focus:outline-none"
                           required

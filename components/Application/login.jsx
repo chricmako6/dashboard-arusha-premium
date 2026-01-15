@@ -11,10 +11,12 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
   onAuthStateChanged,
+  applyActionCode
 } from "firebase/auth";
-import { auth, sendVerificationEmail } from "@/lib/firebase";
-import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
+import { getFirestore, doc, setDoc, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
+import Firstwait from "./firstwait";
 
 function Login() {
   const router = useRouter();
@@ -24,10 +26,12 @@ function Login() {
   const [passwordSignUp, setPasswordSignUp] = useState("");
   const [emailLogin, setEmailLogin] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // FIXED: Changed to setIsLoading
+  const [isLoading, setIsLoading] = useState(false);
+  const [waitingForApproval, setWaitingForApproval] = useState(false);
   const [awaitingVerification, setAwaitingVerification] = useState(false);
   const [error, setError] = useState("");
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
 
   // Password Validation Logic
   const validatePassword = (pass) => {
@@ -42,13 +46,62 @@ function Login() {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is logged in, check verification status
-        await checkUserVerificationStatus(user);
+        // Check if this is coming from email verification
+        const urlParams = new URLSearchParams(window.location.search);
+        const oobCode = urlParams.get('oobCode');
+        const mode = urlParams.get('mode');
+        
+        if (oobCode && mode === 'verifyEmail') {
+          await handleEmailVerification(oobCode, user);
+        } else {
+          // Normal auth state change
+          await checkUserVerificationStatus(user);
+        }
       }
     });
     
     return () => unsubscribe();
   }, []);
+
+  // Function to handle email verification when link is clicked
+  const handleEmailVerification = async (oobCode, user) => {
+    try {
+      // Apply the verification code
+      await applyActionCode(auth, oobCode);
+      
+      // Reload user to get updated emailVerified status
+      await user.reload();
+      const updatedUser = auth.currentUser;
+      
+      if (updatedUser && updatedUser.emailVerified) {
+        // Update Firestore document
+        const db = getFirestore();
+        await updateDoc(doc(db, "users", updatedUser.uid), {
+          emailVerified: true,
+          isVerified: true,
+          status: "verified",
+          verifiedAt: serverTimestamp(),
+        });
+        
+        // Hide the waiting popup
+        setWaitingForApproval(false);
+        setIsVerified(true);
+        
+        toast.success("Email verified successfully!");
+        
+        // Redirect to verification page or dashboard
+        router.push("/verification");
+      } else {
+         // Still not verified
+        setWaitingForApproval(true);
+        setIsVerified(false);
+      }
+
+    } catch (error) {
+      console.error("Email verification error:", error);
+      toast.error("Failed to verify email. Please try again.");
+    }
+  };
 
   const checkUserVerificationStatus = async (user) => {
     try {
@@ -58,11 +111,16 @@ function Login() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         
-        // Check if user needs verification
-        if (!userData.emailVerified || userData.status === "pending_verification") {
+        // Check if user is verified
+        if (userData.emailVerified && userData.isVerified) {
+          setIsVerified(true);
+          setWaitingForApproval(false);
+        } else if (userData.status === "pending_verification") {
           // User needs verification, show overlay
           setAwaitingVerification(true);
           setCurrentUserEmail(user.email);
+          setWaitingForApproval(true);
+          setIsVerified(false);
           return;
         }
         
@@ -77,7 +135,22 @@ function Login() {
     }
   };
 
- 
+  // Send verification email function
+  const sendVerificationEmail = async (user) => {
+    try {
+      const actionCodeSettings = {
+        url: `${window.location.origin}?mode=verifyEmail&oobCode=`,
+        handleCodeInApp: true,
+      };
+      
+      await sendEmailVerification(user, actionCodeSettings);
+      return true;
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      throw error;
+    }
+  };
+
   const isSignUpValid = nameInput.trim() !== "" && 
                        emailSignUp.trim() !== "" && 
                        passwordSignUp.trim() !== "";
@@ -101,7 +174,7 @@ function Login() {
           createdAt: serverTimestamp(),
           lastLogin: serverTimestamp(),
           status: user.emailVerified ? "verified" : "pending_verification",
-          isVerified: false, 
+          isVerified: user.emailVerified || false, 
           isAdmin: false,
           ...additionalData
         });
@@ -120,8 +193,8 @@ function Login() {
     }
   };
 
-  // ✅ UPDATED: Handle sign up with EMAIL LINK verification (Magic Link)
-   const handleSignUp = async (e) => {
+  // ✅ UPDATED: Handle sign up with EMAIL LINK verification
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -140,6 +213,8 @@ function Login() {
 
     try {
       setIsLoading(true);
+      
+      // Create user account
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         emailSignUp,
@@ -147,7 +222,11 @@ function Login() {
       );
 
       const user = userCredential.user;
+      
+      // Update profile with display name
       await updateProfile(user, { displayName: nameInput });
+      
+      // Send verification email
       await sendVerificationEmail(user);
 
       // CREATE USER DOCUMENT IN FIRESTORE
@@ -159,8 +238,15 @@ function Login() {
         status: "pending_verification"
       });
 
+      // Show the waiting approval popup
+      setWaitingForApproval(true);
+      setIsVerified(false);
+      
       toast.success("Account created! Please verify your email.");
-      router.replace("/verification");
+      
+      // Don't redirect immediately - wait for verification
+      // The popup will stay until user verifies email
+      
     } catch (err) {
       const message = err.code === 'auth/email-already-in-use' 
         ? "This email is already registered." 
@@ -172,15 +258,32 @@ function Login() {
     }
   };
 
+
   // ✅ UPDATED: Handle login with verification check
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
-      toast.success("Welcome back!");
-      router.push("/verification");
+      const userCredential = await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
+      const user = userCredential.user;
+      
+      // Check verification status
+      if (!user.emailVerified) {
+        setError("Please verify your email before logging in.");
+        toast.error("Please verify your email before logging in.");
+        
+        // Show the waiting popup
+        setWaitingForApproval(true);
+        setIsVerified(false);
+        setCurrentUserEmail(user.email);
+        
+        // Optionally resend verification email
+        await sendVerificationEmail(user);
+      } else {
+        toast.success("Welcome back!");
+        router.push("/verification");
+      }
     } catch (err) {
       setError("Invalid credentials.");
       toast.error("Wrong credentials.");
@@ -224,22 +327,9 @@ function Login() {
           status: "verified"
         });
         
-        // Check if this is a new user
-        const db = getFirestore();
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          
-          if (userData.status === "pending_verification") {
-            // Update status since social login emails are verified
-            await setDoc(doc(db, "users", user.uid), {
-              emailVerified: true,
-              status: "verified",
-              lastLogin: serverTimestamp()
-            }, { merge: true });
-          }
-        }
+        // Hide any waiting popup
+        setWaitingForApproval(false);
+        setIsVerified(true);
         
         // Redirect to verification page (profile completion)
         router.push("/verification");
@@ -306,12 +396,7 @@ function Login() {
         return;
       }
       
-      const actionCodeSettings = {
-        url: `${window.location.origin}/auth?verified=true`,
-        handleCodeInApp: true
-      };
-      
-      await sendEmailVerification(user, actionCodeSettings);
+      await sendVerificationEmail(user);
       setError("Verification email resent! Please check your inbox.");
       toast.success("Verification email resent!");
       
@@ -322,8 +407,27 @@ function Login() {
     }
   };
 
+  // Close the waiting popup (optional - for user to dismiss manually)
+  const closeWaitingPopup = () => {
+    setWaitingForApproval(false);
+    toast.info("You can continue to verify your email. Check your inbox.");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 relative">
+      {/* Waiting Approval Popup */}
+      {waitingForApproval && !isVerified && (
+        <div className='fixed inset-0 z-50 backdrop-blur-xl'>
+          <div className="fixed top-10 left-1/2 transform -translate-x-1/2 z-9999 backdrop-blur-sm flex items-center justify-center">
+            <Firstwait  
+              email={currentUserEmail || emailSignUp}
+              onResendVerification={handleResendVerification}
+              onClose={closeWaitingPopup}
+            />
+          </div>
+        </div>
+      )}
+      
       <div className="z-10 w-full max-w-md bg-[#111118]/60 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/10">
         {/* Tab Navigation */}
         <div className="flex space-x-6 mb-6 justify-center">
@@ -331,6 +435,7 @@ function Login() {
             onClick={() => {
               setActiveTab("signup");
               setError("");
+              setWaitingForApproval(false);
             }}
             className={`font-semibold border-2 rounded-full py-1 px-3 cursor-pointer transition-colors ${
               activeTab === "signup"
@@ -344,6 +449,7 @@ function Login() {
             onClick={() => {
               setActiveTab("signin");
               setError("");
+              setWaitingForApproval(false);
             }}
             className={`font-semibold border-2 rounded-full py-1 px-3 cursor-pointer transition-colors ${
               activeTab === "signin"
@@ -359,7 +465,6 @@ function Login() {
           {activeTab === "signup" ? "Create an account" : "Welcome back"}
         </h2>
 
-        
         <div className="space-y-4">
           {activeTab === "signup" && (
             <>
