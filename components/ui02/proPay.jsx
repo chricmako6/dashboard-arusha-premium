@@ -44,8 +44,8 @@ function ProPay({ profileData, onEdit }) {
             {getCardIcon(profileData?.cardType)}
             <div className="text-right">
               <div className="text-xs opacity-80">Status</div>
-              <div className={`text-sm font-semibold ${profileData?.status === 'active' ? 'text-green-300' : 'text-yellow-300'}`}>
-                {profileData?.status || 'Inactive'}
+              <div className={`text-sm font-semibold ${profileData?.stat === 'active' ? 'text-green-300' : 'text-yellow-300'}`}>
+                {profileData?.stat || 'Inactive'}
               </div>
             </div>
           </div>
@@ -73,8 +73,8 @@ function ProPay({ profileData, onEdit }) {
               </span>
             </p>
              <p className='text-sm text-gray-600 mb-2'>Status
-              <span className={`text-sm font-semibold float-end ${profileData?.status === 'active' ? 'text-green-300' : 'text-yellow-300'}`}>
-                {profileData?.status || 'Inactive'}
+              <span className={`text-sm font-semibold float-end ${profileData?.stat === 'active' ? 'text-green-300' : 'text-yellow-300'}`}>
+                {profileData?.stat || 'Inactive'}
               </span>
             </p>
         </div>

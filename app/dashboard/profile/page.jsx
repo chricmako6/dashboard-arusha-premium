@@ -71,9 +71,9 @@ function pageProfile() {
     }
   }
 
-  const handleEditProfile = () => {
-  router.push('/verification')
-  }
+  // const handleEditProfile = () => {
+  // router.push('/verification')
+  // }
 
   if (loading) {
   return (
