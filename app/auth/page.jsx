@@ -1,6 +1,6 @@
 "use client"
-import React, {useEffect, useState} from 'react'
-import { useRouter, useSearchParams } from "next/navigation";
+import React, {useState, useEffect} from 'react'
+import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
@@ -9,41 +9,41 @@ import { PiDotsThreeOutlineBold } from "react-icons/pi";
 
 function pageAuth() {
   const router = useRouter();
-   const searchParams = useSearchParams();
-  const [canAccess, setCanAccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [canAccess, setCanAccess] = useState(false);
   // const [showWaiting, setShowWaiting] = useState(false); 
+  //  const searchParams = useSearchParams();
 
-   useEffect(() => {
-    // Check for email verification callback
-    const verified = searchParams.get('verified');
-    if (verified === 'true') {
-      handleEmailVerificationCallback();
-    }
-  }, [searchParams]);
+  //  useEffect(() => {
+  //   // Check for email verification callback
+  //   const verified = searchParams.get('verified');
+  //   if (verified === 'true') {
+  //     handleEmailVerificationCallback();
+  //   }
+  // }, [searchParams]);
 
-  const handleEmailVerificationCallback = async () => {
-    if (auth.currentUser) {
-      try {
-        await auth.currentUser.reload();
-        if (auth.currentUser.emailVerified) {
-          // Update Firestore
-          const db = getFirestore();
-          await setDoc(doc(db, "users", auth.currentUser.uid), {
-            emailVerified: true,
-            status: "verified",
-            lastLogin: new Date()
-          }, { merge: true });
+  // const handleEmailVerificationCallback = async () => {
+  //   if (auth.currentUser) {
+  //     try {
+  //       await auth.currentUser.reload();
+  //       if (auth.currentUser.emailVerified) {
+  //         // Update Firestore
+  //         const db = getFirestore();
+  //         await setDoc(doc(db, "users", auth.currentUser.uid), {
+  //           emailVerified: true,
+  //           status: "verified",
+  //           lastLogin: new Date()
+  //         }, { merge: true });
           
-          setEmailVerified(true);
-          router.replace("/verification");
-        }
-      } catch (error) {
-        console.error("Error handling verification callback:", error);
-      }
-    }
-  };
+  //         setEmailVerified(true);
+  //         router.replace("/verification");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error handling verification callback:", error);
+  //     }
+  //   }
+  // };
 
  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
