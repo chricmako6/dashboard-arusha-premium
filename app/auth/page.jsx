@@ -10,41 +10,8 @@ import { PiDotsThreeOutlineBold } from "react-icons/pi";
 function pageAuth() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [emailVerified, setEmailVerified] = useState(false);
   const [canAccess, setCanAccess] = useState(false);
-  // const [showWaiting, setShowWaiting] = useState(false); 
-  //  const searchParams = useSearchParams();
-
-  //  useEffect(() => {
-  //   // Check for email verification callback
-  //   const verified = searchParams.get('verified');
-  //   if (verified === 'true') {
-  //     handleEmailVerificationCallback();
-  //   }
-  // }, [searchParams]);
-
-  // const handleEmailVerificationCallback = async () => {
-  //   if (auth.currentUser) {
-  //     try {
-  //       await auth.currentUser.reload();
-  //       if (auth.currentUser.emailVerified) {
-  //         // Update Firestore
-  //         const db = getFirestore();
-  //         await setDoc(doc(db, "users", auth.currentUser.uid), {
-  //           emailVerified: true,
-  //           status: "verified",
-  //           lastLogin: new Date()
-  //         }, { merge: true });
-          
-  //         setEmailVerified(true);
-  //         router.replace("/verification");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error handling verification callback:", error);
-  //     }
-  //   }
-  // };
-
+ 
  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -73,8 +40,6 @@ function pageAuth() {
                   status: "verified"
                 }, { merge: true });
               }
-              
-              router.replace("/verification");
               return;
             }
             
@@ -82,10 +47,7 @@ function pageAuth() {
             setShowWaiting(true);
             setCanAccess(true);
             setLoading(false);
-          } else {
-            router.replace("/auth");
           }
-          
         } catch (error) {
           console.error("Error checking user role:", error);
           router.replace("/auth");
@@ -108,11 +70,6 @@ function pageAuth() {
       </div>
     );
   }
-
-  // if (showWaiting) {
-  //   // Render Firstwait component directly
-  //   return <Firstwait />;
-  // }
 
   return (
     <div className='bg-gray-200'>

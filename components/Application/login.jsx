@@ -88,6 +88,18 @@ function Login() {
         setIsVerified(true);
         
         toast.success("Email verified successfully!");
+
+        // CHECK FOR ADMIN STATUS
+        const userDoc = await getDoc(doc(db, "users", updatedUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          // If user is admin, redirect to admin page
+          if (userData.isAdmin === true) {
+            router.push("/admin"); // Adjust to your admin page route
+            return;
+          }
+        }
         
         // Redirect to verification page or dashboard
         router.push("/verification");
@@ -110,6 +122,12 @@ function Login() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
+
+      // CHECK FOR ADMIN STATUS FIRST
+      if (userData.isAdmin === true) {
+        router.push("/admin");
+        return;
+      }
         
         // Check if user is verified
         if (userData.emailVerified && userData.isVerified) {
@@ -157,7 +175,7 @@ function Login() {
   const isLoginValid = emailLogin.trim() !== "" && 
                        passwordLogin.trim() !== "";
 
-  // ✅ UPDATED: Unified function to handle user creation and verification
+  // UPDATED: Unified function to handle user creation and verification
   const createUserDocument = async (user, additionalData = {}) => {
     try {
       const db = getFirestore();
@@ -193,7 +211,7 @@ function Login() {
     }
   };
 
-  // ✅ UPDATED: Handle sign up with EMAIL LINK verification
+  // UPDATED: Handle sign up with EMAIL LINK verification
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
@@ -244,8 +262,6 @@ function Login() {
       
       toast.success("Account created! Please verify your email.");
       
-      // Don't redirect immediately - wait for verification
-      // The popup will stay until user verifies email
       
     } catch (err) {
       const message = err.code === 'auth/email-already-in-use' 
@@ -259,7 +275,7 @@ function Login() {
   };
 
 
-  // ✅ UPDATED: Handle login with verification check
+  // UPDATED: Handle login with verification check
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -268,6 +284,21 @@ function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
       const user = userCredential.user;
       
+      // CHECK FOR ADMIN STATUS
+      const db = getFirestore();
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        
+        // If user is admin, redirect to admin page immediately
+        if (userData.isAdmin === true) {
+          router.push("/admin"); // Adjust to your admin page route
+          return;
+        }
+      }
+
+
       // Check verification status
       if (!user.emailVerified) {
         setError("Please verify your email before logging in.");
@@ -326,6 +357,20 @@ function Login() {
           isAdmin: false,
           status: "verified"
         });
+
+        // CHECK FOR ADMIN STATUS
+        const db = getFirestore();
+        const updatedUserDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (updatedUserDoc.exists()) {
+          const userData = updatedUserDoc.data();
+          
+          // If user is admin, redirect to admin page
+          if (userData.isAdmin === true) {
+            router.push("/admin");
+            return;
+          }
+        }
         
         // Hide any waiting popup
         setWaitingForApproval(false);
