@@ -1,16 +1,40 @@
 "use client";
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import Image from 'next/image';
 import { getFirebaseAuth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { signOut } from 'firebase/auth';
 import { useRouter } from "next/navigation";
+import { FaUserAlt } from 'react-icons/fa';
+import { BiSolidMessageAltDetail, BiSupport } from 'react-icons/bi';
+import { IoSettingsSharp } from 'react-icons/io5';
+import { RiLogoutCircleLine } from 'react-icons/ri';
 
-function Navbar({ displayName, profileImage }) {
+function Navbar({ displayName, profilePicture }) {
    const router = useRouter(); 
    const [isLoggingOut, setIsLoggingOut] = useState(false);
    const [User, setUser] = useState(null);
    const [canAccess, setCanAccess] = useState(false);
+
+  // Fetch current user
+   useEffect(() => {
+     const auth = getFirebaseAuth();
+     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+       if (currentUser) {
+         setUser({
+           displayName: currentUser.displayName,
+           email: currentUser.email,
+           photoURL: currentUser.photoURL
+         });
+       } else {
+         setUser(null);
+       }
+       setLoading(false);
+     }, 1000);
+     
+     return () => unsubscribe();
+   }, []); 
 
   const handleLogout = async () => {
     try {
@@ -77,7 +101,7 @@ function Navbar({ displayName, profileImage }) {
             <span className='text-xs leading-2 text-gray-500 my-2'>Welcome User</span>
           </div>
           <img 
-            src={profileImage || '/profile2.svg'}
+            src={profilePicture || '/profile2.svg'}
             alt='profile'
             className='bg-white rounded-full w-10 h-10 object-cover'
             onError={(e) => {
@@ -89,10 +113,27 @@ function Navbar({ displayName, profileImage }) {
            {/* Dropdown */}
           <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
             <div className="py-1">
-              <a href="/dashboard/profile" className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100">My Profile</a>
-              <a href="/dashboard/setting" className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100">Setting</a>
+              <a href="/dashboard/profile" className="hover:text-amber-200 font-bold flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+                <FaUserAlt className='w-5 h-5' />
+                Profile
+              </a>
+              <a href="/dashboard/#" className="hover:text-amber-200 font-bold flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+                <BiSolidMessageAltDetail className='w-5 h-5' />
+                Inbox
+              </a>
+              <a href="/dashboard/setting" className="hover:text-amber-200font-bold flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+                <IoSettingsSharp className='w-5 h-5'/>
+                Setting
+              </a>
+              <a href="/dashboard/#" className="hover:text-amber-200 font-bold flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+                <BiSupport className='w-5 h-5' />
+                Support
+              </a>
               <hr className="my-1 border-gray-200" />
-              <a  onClick={handleLogout} className="block px-3 py-2 text-xs text-red-600 hover:bg-red-50">Logout</a>
+              <a onClick={handleLogout} className="font-bold items-center gap-2 flex px-3 py-2 text-xs hover:text-red-600 ">
+                <RiLogoutCircleLine className='w-5 h-5'/>
+                Logout
+              </a>
             </div>
           </div>
         </div>

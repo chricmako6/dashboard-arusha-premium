@@ -9,6 +9,7 @@ import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
 import { FaExclamationTriangle } from "react-icons/fa";
 import UsersCard from "../component/usersCard";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 function PageUser() {
   // State for users
@@ -17,6 +18,14 @@ function PageUser() {
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [error, setError] = useState(null);
   
+    // User statistics state
+  const [userStats, setUserStats] = useState({
+    active: 0,
+    suspended: 0,
+    admin: 0,
+    total: 0
+  });
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
@@ -36,12 +45,83 @@ function PageUser() {
     return () => unsubscribe();
   }, []);
 
+
   // Fetch users from Firestore
   useEffect(() => {
     if (currentAdmin) {
       fetchUsers();
     }
   }, [currentAdmin]);
+
+    // Calculate user statistics whenever users change
+  useEffect(() => {
+    if (users.length > 0) {
+      const stats = calculateUserStats(users);
+      setUserStats(stats);
+    } else {
+      // Reset stats when no users
+      setUserStats({
+        active: 0,
+        suspended: 0,
+        admin: 0,
+        total: 0
+      });
+    }
+  }, [users]);
+
+   // Calculate user statistics whenever users change
+  useEffect(() => {
+    if (users.length > 0) {
+      const stats = calculateUserStats(users);
+      setUserStats(stats);
+    } else {
+      // Reset stats when no users
+      setUserStats({
+        active: 0,
+        suspended: 0,
+        admin: 0,
+        total: 0
+      });
+    }
+  }, [users]);
+
+  // Function to calculate user statistics
+  const calculateUserStats = (usersList) => {
+    let active = 0;
+    let suspended = 0;
+    let admin = 0;
+    let total = usersList.length;
+
+    usersList.forEach(user => {
+      // Count active users (status is "active" or "verified" or isVerified is true)
+      if (user.status === "active" || 
+          user.status === "verified" || 
+          user.isVerified === true ||
+          user.stat === "Active") {
+        active++;
+      }
+      
+      // Count suspended users
+      if (user.status === "suspended" || 
+          user.stat === "Suspended" || 
+          user.isVerified === false) {
+        suspended++;
+      }
+      
+      // Count admin users
+      if (user.isAdmin === true || 
+          user.access.includes("Admin")) {
+        admin++;
+      }
+    });
+
+    return {
+      active,
+      suspended,
+      admin,
+      total
+    };
+  };
 
   const fetchUsers = async () => {
     try {
@@ -56,7 +136,7 @@ function PageUser() {
         return {
           id: doc.id,
           name: data.displayName || data.email?.split('@')[0] || "Unknown User",
-          image: data.photoURL || "/user1.png",
+          image: data.profilePicture || "/user1.png",
           email: data.email || "No email",
           access: data.isAdmin ? "Admin: Full Access" : data.accessLevel || "Data Entry",
           last: formatDate(data.lastLogin?.toDate()) || "Never",
@@ -203,6 +283,70 @@ function PageUser() {
     } catch (error) {
       console.error("Error in user deletion:", error);
       toast.error(`Deletion failed: ${error.message}`);
+    }
+  };
+
+  // Handle activate user to admin
+  const handleActivateToAdmin = async (userId) => {
+    if (!confirm("Are you sure you want to make this user an Admin?")) return;
+    
+    try {
+      const db = getFirestore();
+      
+      // Update user in 'users' collection to make them admin
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        isAdmin: true,
+        access: "Admin: Full Access",
+        status: "active",
+        isVerified: true,
+        updatedAt: new Date()
+      });
+      
+      // Update local state
+      setUsers(users.map(user => 
+        user.id === userId 
+          ? { ...user, isAdmin: true, access: "Admin: Full Access", stat: "Active" }
+          : user
+      ));
+      
+      toast.success("User promoted to Admin successfully!");
+      
+    } catch (error) {
+      console.error("Error promoting user to admin:", error);
+      toast.error(`Failed to promote user: ${error.message}`);
+    }
+  };
+
+  // Handle turn user to normal (Data Entry)
+  const handleTurnToNormalUser = async (userId) => {
+    if (!confirm("Are you sure you want to remove admin privileges and turn this user to normal (Data Entry)?")) return;
+    
+    try {
+      const db = getFirestore();
+      
+      // Update user in 'users' collection to remove admin privileges
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        isAdmin: false,
+        access: "Data Entry",
+        status: "active",
+        isVerified: true,
+        updatedAt: new Date()
+      });
+      
+      // Update local state
+      setUsers(users.map(user => 
+        user.id === userId 
+          ? { ...user, isAdmin: false, access: "Data Entry", stat: "Active" }
+          : user
+      ));
+      
+      toast.success("User demoted to Normal user successfully!");
+      
+    } catch (error) {
+      console.error("Error demoting user:", error);
+      toast.error(`Failed to demote user: ${error.message}`);
     }
   };
 
@@ -510,7 +654,7 @@ function PageUser() {
   return (
   <>     
     <div className="p-4">
-      <UsersCard />
+      <UsersCard userStats={userStats} />
     </div>
     <div className="bg-white rounded-md p-4 mt-4 shadow-md w-[98%] mx-auto">
       {/* Error Display */}
@@ -677,6 +821,26 @@ function PageUser() {
                             >
                               <FaUserCheck className="w-3.5 h-3.5" />
                               Activate User
+                            </button>
+                          )}
+                          
+                          {user.stat === 'Active' && !user.isAdmin && (
+                            <button 
+                              onClick={() => handleActivateToAdmin(user.id)}
+                              className="cursor-pointer w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2"
+                            >
+                              <MdAdminPanelSettings className="w-3.5 h-3.5" />
+                              Activate Admin
+                            </button>
+                          )}
+
+                          {user.stat === 'Active' && user.isAdmin && (
+                            <button 
+                              onClick={() => handleTurnToNormalUser(user.id)}
+                              className="cursor-pointer w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                            >
+                              <FaUserCheck className="w-3.5 h-3.5" />
+                               Normal User
                             </button>
                           )}
                           
