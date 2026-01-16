@@ -1,0 +1,40 @@
+import React from 'react';
+import Image from 'next/image';
+import { FaUserLargeSlash } from 'react-icons/fa6';
+import { FaUser } from 'react-icons/fa';
+import { MdAdminPanelSettings } from 'react-icons/md';
+import { GrValidate } from "react-icons/gr";
+
+const userData = [
+  { id: 1, action: <GrValidate className='w-8 h-8 text-gray-500'/>, value: '1,234', username: 'Active' },
+  { id: 2, action: <FaUserLargeSlash className='w-8 h-8 text-gray-500'/>, value: '1,679', username: 'Suspended' },
+  { id: 3, action: <MdAdminPanelSettings className='w-8 h-8 text-gray-500'/>, value: '1,890', username: 'Admin' },
+  { id: 4, action: <FaUser className='w-8 h-8 text-gray-500'/>, value: '1,345', username: 'Users' },
+];
+
+function UsersCard() {
+  return (
+    <div className='flex flex-wrap gap-4 w-full'>
+      {userData.map(user => (
+        <div key={user.id} className='odd:bg-purple-200 even:bg-amber-200 rounded-xl p-4 shadow-md flex-1'>
+          <div className='flex justify-between items-center'>
+            <span className='text-[10px] bg-white p-2 items-center rounded-full'>
+              {user.action}
+            </span>
+            <Image 
+              src="/3dots.svg" 
+              alt="menu" 
+              width={25} 
+              height={25} 
+              className='w-6 h-6'
+            />
+          </div>
+          <h1 className='text-2xl font-semibold my-4'>{user.value}</h1>
+          <h2 className='capitalize text-sm font-medium text-gray-500'>{user.username}</h2>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default UsersCard;

@@ -8,6 +8,7 @@ import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc } 
 import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
 import { FaExclamationTriangle } from "react-icons/fa";
+import UsersCard from "../component/usersCard";
 
 function PageUser() {
   // State for users
@@ -507,6 +508,10 @@ function PageUser() {
   };
 
   return (
+  <>     
+    <div className="p-4">
+      <UsersCard />
+    </div>
     <div className="bg-white rounded-md p-4 mt-4 shadow-md w-[98%] mx-auto">
       {/* Error Display */}
       {error && (
@@ -713,6 +718,7 @@ function PageUser() {
         />
       )}
     </div>
+  </>
   );
 }
 

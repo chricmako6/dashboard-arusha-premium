@@ -56,7 +56,7 @@ function pageAuth() {
         setCanAccess(true);
         setLoading(false);
       }
-    });
+    }, 1000);
     
     return () => unsubscribe();
   }, [router]);
